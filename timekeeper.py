@@ -46,9 +46,16 @@ def clock_in():
     print("INSTRUCTIONS:")
     print("To Clock in for work, please enter your Employee ID and Press "
           "Enter.")
+    print("To return to the Main Menu, press the Escape key (Esc).")
     print("\nNot sure if you're clocked in or out? Don't worry! You can try "
         "clocking in or clocking out again and the program will tell you if "
         "you are already clocked in or out!")
+    print("\nPlease enter your Employee ID: ", end="", flush=True)
+    while True:
+        ch = getchar()
+
+        if ord(ch) == 27:
+            return
 
 
 
