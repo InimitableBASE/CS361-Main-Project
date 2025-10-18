@@ -7,13 +7,73 @@
 import os
 import msvcrt
 
+# Temporary Globals
+USER1ID = '1234'
+
+# GLOBALS
+KEYMAP = {
+    '3b': 'F1',
+    '48': 'UP',
+    '50': 'DOWN',
+    '4b': 'LEFT',
+    '4d': 'RIGHT'
+}
+
+KEYS = ['F1',
+        'UP',
+        'DOWN',
+        'LEFT',
+        'RIGHT']
+
 # VARIABLE GLOBALS
 CurrentEntry = ''      # Used to track the users current entry
 
 # Create a function than can retrieve user keyboard entries
 def getchar():
-      ch = msvcrt.getch()
-      return ch.decode('utf', errors='ignore')
+    ch = msvcrt.getch()
+    
+    # handle if a special key was pressed that has a prefix byte (i.e. arrows,
+    # F1, F2, etc. - these keys will all have two byes that are read and the 
+    # first byte will be the hex value x00 or xe0)
+    if ch in (b'\x00', b'\xe0'):
+        # get the second character to determine if it's a special key 
+        # that I want to deal with. 
+        ch2 = msvcrt.getch()
+        code = ch2.hex()
+        return KEYMAP.get(code, 'IGNORE')
+    return ch.decode('utf', errors='ignore') 
+
+def getentry():
+    entry = ''
+    while True:
+        ch = getchar()
+        
+        # If the entry is a keyboard button to ignore:
+        if ch == 'IGNORE':
+            continue
+        
+        if ch in KEYS:
+            continue
+
+        # If Entry is Escape Key
+        if ord(ch) == 27:
+            return          # TODO: Create state management
+        
+        # If Entry is Backspace
+        if ord(ch) == 8:
+            if len(entry) > 0:
+                entry = entry[:-1] # remove last character
+                # move cursor back, print space over it, move cursor back again
+                print("\b \b", end="", flush=True) 
+
+        # if the character is printable, add it to the CurrentEntry
+        if ch.isprintable():
+            entry += ch
+            print(f'{ch}', end="", flush=True)
+
+        # if Entry is Enter
+        if ord(ch) == 13:
+            return entry           
 
 
 def main_menu():
@@ -40,7 +100,9 @@ def main_menu():
 
 
 def clock_in():
-    os.system('cls') # Clear Screen
+    os.system('cls')    # Clear Screen
+    CurrentEntry = ''   # Clear CurrentEntry for use in this screen.  
+    
     print("CLOCK IN\n")
     print("Clocking in tracks when you start work.\n")
     print("INSTRUCTIONS:")
@@ -51,13 +113,7 @@ def clock_in():
         "clocking in or clocking out again and the program will tell you if "
         "you are already clocked in or out!")
     print("\nPlease enter your Employee ID: ", end="", flush=True)
-    while True:
-        ch = getchar()
-
-        if ord(ch) == 27:
-            return
-
-
+    CurrentEntry = getentry()
 
 def main():
     main_menu()
