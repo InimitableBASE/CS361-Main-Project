@@ -28,7 +28,7 @@ KEYS = ['F1',
 # VARIABLE GLOBALS
 CurrentEntry = ''      # Used to track the users current entry
 
-# Create a function than can retrieve user keyboard entries
+"""Function that gets keys pressed on keyboard by the user"""
 def getchar():
     ch = msvcrt.getch()
     
@@ -43,6 +43,11 @@ def getchar():
         return KEYMAP.get(code, 'IGNORE')
     return ch.decode('utf', errors='ignore') 
 
+
+"""
+Function that gets a users input and returns it when they press enter. 
+If the user presses Escape, program returns without returning an entry
+"""
 def getentry():
     entry = ''
     while True:
@@ -57,7 +62,7 @@ def getentry():
 
         # If Entry is Escape Key
         if ord(ch) == 27:
-            return          # TODO: Create state management
+            return          
         
         # If Entry is Backspace
         if ord(ch) == 8:
@@ -73,6 +78,7 @@ def getentry():
 
         # if Entry is Enter
         if ord(ch) == 13:
+            print("", end="\n", flush=False)
             return entry           
 
 
@@ -112,8 +118,20 @@ def clock_in():
     print("\nNot sure if you're clocked in or out? Don't worry! You can try "
         "clocking in or clocking out again and the program will tell you if "
         "you are already clocked in or out!")
+    
     print("\nPlease enter your Employee ID: ", end="", flush=True)
     CurrentEntry = getentry()
+
+    # User Exists - Clock them in
+    if CurrentEntry == USER1ID:
+        print("\nFIRST LAST CLOCKED IN AT TIME")
+        # TODO: Add users clock in to time card
+
+    # User pressed Escape Key, go back to Main menu
+    if CurrentEntry == None:
+        # TODO: Handle State change
+        pass
+        
 
 def main():
     main_menu()
