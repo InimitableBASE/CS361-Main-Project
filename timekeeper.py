@@ -3,9 +3,17 @@
 
 # UI currently works exclusively for windows based systems. 
 
-# Included Libraries
+# IMPORTED LIBRARIES
 import os
+import msvcrt
 
+# VARIABLE GLOBALS
+CurrentEntry = ''      # Used to track the users current entry
+
+# Create a function than can retrieve user keyboard entries
+def getchar():
+      ch = msvcrt.getch()
+      return ch.decode('utf', errors='ignore')
 
 
 def main_menu():
@@ -15,16 +23,21 @@ def main_menu():
     print("MAIN MENU\n")
     print("Select a numerical option from the list below by pressing that "
           "numbers respective key on the keyboard:")
-    print("(1)\tClock In")
-    print("(2)\tClock Out")
-    print("(3)\tSupervisor Menu")
-    print("(4)\tQuit")
+    print("(1)\tCLOCK IN")
+    print("(2)\tCLOCK OUT")
+    print("(3)\tSUPERVISOR MENU")
+    print("(4)\tQUIT")
     print("\n\"Clock In\" tracks when you start work, \"Clock out\" tracks "
           "when you stop work. Each takes less than a minute to help ensure "
           "you are paid for your hard work!")
     print("\nNot sure if you're clocked in or out? Don't worry! You can try "
           "clocking in or clocking out again and the program will tell you if "
           "you are already clocked in or out!")
+    CurrentEntry = getchar()
+    if CurrentEntry == "1":
+        clock_in()        
+
+
 
 def clock_in():
     os.system('cls') # Clear Screen
