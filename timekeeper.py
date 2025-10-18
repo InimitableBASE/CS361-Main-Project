@@ -9,7 +9,7 @@ import msvcrt
 from datetime import datetime
 
 # GLOBALS
-EMP_FILE = "employees.json"
+EMP_FILE = "employees.json"  # eventually store all employee data in JSON
 
 
 KEYMAP = {
@@ -89,36 +89,46 @@ def getentry():
                 # move cursor back, print space over it, move cursor back again
                 print("\b \b", end="", flush=True) 
 
-        # if the character is printable, add it to the Cur_Entry
+        # if the character is printable, add it to the entry
         if ch.isprintable():
             entry += ch
             print(f'{ch}', end="", flush=True)
 
-        # if Entry is Enter
+        # if entry is Enter
         if ch == '\r':
             print("", end="\n", flush=False)
             return entry           
+
+
+# HELPER FUNCTIONS
+def _formatTime(time):
+    return time.strftime('%H:%M:%S')
+
+def _formatDate(time):
+    return time.strftime('%m/%d/%Y')
 
 def _new_clock_in(entry):
         f_name = Employees[entry]['first']
         l_name = Employees[entry]['last']
         time = datetime.now()
         card = {
-                'cit': datetime.now(), 
+                'cit': time, 
                 'cot': "",
                 'hrs': ""
                 }
         Employees[entry]['time_cards'].append(card)
         Employees[entry]['clocked_in'] = True
         Employees[entry]['last_clock_in'] = time
+        date = _formatDate(time)
+        time = _formatTime(time)
         # time = Employees[Cur_Entry]['time_cards'][-1]['cit']
-        print(f'\n{f_name} {l_name} HAS CLOCKED IN AT {time}')
+        print(f'\n{f_name} {l_name} HAS CLOCKED IN ON {date} AT {time}')
 
 """Main Menu Screen"""
 def main_menu():
     os.system('cls') # Clear Screen
     print("\t\t\t\tWELCOME TO TIMEKEEPER!")
-    print("\t\tThe Program that tracks your work hours so you can get paid!\n")
+    print("\t\tThe program that tracks your work hours so you can get paid!\n")
     print("MAIN MENU\n")
     print("Select a numerical option from the list below by pressing that "
           "numbers respective key on the keyboard:")
@@ -149,7 +159,7 @@ def clock_in():
     print("CLOCK IN\n")
     print("Clocking in tracks when you start work.\n")
     print("INSTRUCTIONS:")
-    print("To Clock in for work, please enter your Employee ID and Press "
+    print("To clock in for work, please enter your Employee ID and press "
           "Enter.")
     print("To return to the Main Menu, press the Escape key (Esc).")
     print("\nNot sure if you're clocked in or out? Don't worry! You can try "
@@ -160,27 +170,41 @@ def clock_in():
     
     Cur_Entry = getentry()
 
+    # User Exists and is already clocked in
     if Cur_Entry in Employees and Employees[Cur_Entry]["clocked_in"]:
         f_name = Employees[Cur_Entry]['first']
         l_name = Employees[Cur_Entry]['last']
         print(f'{f_name} {l_name} is already clocked in!')
-        print("\nPress Esc to retun to the main manu, or any other key to try "
-              "again.")
-        getchar()
-        return "main_menu"
+        print("\nPress the Escape key (Esc) to return to the Main Menu, or "
+              "any other key to try again.")
+        ch = getchar()
+        if ch == '\x1b':
+            return "main_menu"
+        return "clock_in"
     
     # User Exists & Not already Clocked in - Clock them in
     elif Cur_Entry in Employees:
         _new_clock_in(Cur_Entry)
-        print("\nPress Any Key to Return to the Main Menu.")
+        print("\nPress any key to return to the Main Menu.")
         getchar()
         return "main_menu"
         # TODO: Add users clock in to time card
        
 
     # User pressed Escape Key, go back to Main menu
-    if Cur_Entry == None or Cur_Entry == '':
+    if Cur_Entry == None:
         return "main_menu"
+    
+    # Invalid Entry
+    if Cur_Entry not in Employees:
+        print("\nThat is not a valid Employee ID. See a Supervisor "
+              "if you have forgotten your Employee ID.")
+        print("\nPress the Escape key (Esc) to return to the Main Menu, or "
+              "any other key to try again.")
+        ch = getchar()
+        if ch == '\x1b':
+            return "main_menu"
+        return "clock_in"    
 
 SCREENS = {
     "main_menu": main_menu,
@@ -193,6 +217,7 @@ def main():
         print(Screen)
         next_screen = SCREENS[Screen]()
         if next_screen == "_quit_":
+            os.system('cls')    # Clear Screen
             break
         Screen = next_screen
 
