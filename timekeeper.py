@@ -7,10 +7,11 @@
 import os
 import msvcrt
 from datetime import datetime
+import time
 
 # GLOBALS
 EMP_FILE = "employees.json"  # eventually store all employee data in JSON
-
+PASSWORD = "123456789"
 
 KEYMAP = {
     '3b': 'F1',
@@ -42,10 +43,6 @@ Employees['1234'] = {
     "time_cards": []
 }
 
-
-
-
-
 """Function that gets keys pressed on keyboard by the user"""
 def getchar():
     ch = msvcrt.getch()
@@ -60,7 +57,6 @@ def getchar():
         code = ch2.hex()
         return KEYMAP.get(code, 'IGNORE')
     return ch.decode('utf', errors='ignore') 
-
 
 """
 Function that gets a users input and returns it when they press enter. 
@@ -99,6 +95,43 @@ def getentry():
             print("", end="\n", flush=False)
             return entry           
 
+"""
+Function that gets a users password input and returns it when they press enter. 
+If the user presses Escape, program returns without returning an entry. 
+Password is visually hidden during entry.
+"""
+def getpassword():
+    entry = ''
+    while True:
+        ch = getchar()
+        
+        # If the entry is a keyboard button to ignore:
+        if ch == 'IGNORE':
+            continue
+        
+        if ch in KEYS:
+            continue
+
+        # If Entry is Escape Key
+        if ch == '\x1b':
+            return          
+        
+        # If Entry is Backspace
+        if ch == '\x08':
+            if len(entry) > 0:
+                entry = entry[:-1] # remove last character
+                # move cursor back, print space over it, move cursor back again
+                print("\b \b", end="", flush=True) 
+
+        # if the character is printable, add it to the entry
+        if ch.isprintable():
+            entry += ch
+            print("*", end="", flush=True)
+
+        # if entry is Enter
+        if ch == '\r':
+            print("", end="\n", flush=False)
+            return entry         
 
 # HELPER FUNCTIONS
 def _formatTime(time):
@@ -172,12 +205,11 @@ def main_menu():
         if Cur_Entry == "1":
             return "clock_in"
         if Cur_Entry == "2":
-            return "clock_out"       
+            return "clock_out"
+        if Cur_Entry == "3":
+            return "supervisor_login"       
         if Cur_Entry == "4":
             return "_quit_"
-        
-    
-
 
 """ Clock In Screen """
 def clock_in():
@@ -286,10 +318,46 @@ def clock_out():
             return "main_menu"
         return "clock_out"    
 
+""" Supervisor Login Screen """
+def supervisor_login():
+    os.system('cls')    # Clear Screen
+    Cur_Entry = ''   # Clear Cur_Entry for use in this screen.  
+    
+    print("SUPERVISOR LOGIN\n")
+    print("INSTRUCTIONS:")
+    print("To access the Supervisor Menu, please enter the supervisor password"
+          " press Enter.")
+    print("To return to the Main Menu, press the Escape key (Esc).")
+    
+    print("\nSupervisor Password: ", end="", flush=True)
+    
+    Cur_Entry = getpassword()
+    
+    # User Exists & Not already Clocked in - Clock them in
+    if Cur_Entry == PASSWORD:
+        print("UNDER CONSTRUCTION")
+        time.sleep(3)
+        return "main_menu"
+
+    # User pressed Escape Key, go back to Main menu
+    if Cur_Entry == None:
+        return "main_menu"
+    
+    # Invalid Entry
+    if Cur_Entry != PASSWORD:
+        print("\nINCORRECT PASSWORD")
+        print("\nPress the Escape key (Esc) to return to the Main Menu, or "
+              "any other key to try again.")
+        ch = getchar()
+        if ch == '\x1b':
+            return "main_menu"
+        return "supervisor_login"    
+
 SCREENS = {
     "main_menu": main_menu,
     "clock_in": clock_in,
-    "clock_out": clock_out
+    "clock_out": clock_out,
+    "supervisor_login": supervisor_login
 }
 
 def main():
