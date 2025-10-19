@@ -380,12 +380,32 @@ def supervisor_menu():
         if Cur_Entry == "6":
             return "main_menu"
 
+def supervisor_help():
+    os.system('cls') # Clear Screen
+    print("SUPERVISOR MENU HELP")
+    print("\nTo return to the Supervisor Menu, press any key.\n")
+    message = """TO VIEW EMPLOYEE INFORMATION AND MODIFY OR REMOVE THEM: 
+To view the Employee List, Press the “1” key at the Supervisor Menu. This 
+will display a list of Hourly Employees and their Employee ID. Enter an 
+Employee ID and press the Enter key to see details about that Employee. To 
+Modify that Employee's Information press the “2” Key. To Remove that Employee, 
+press the “3” Key."""
+    print(message)
+    message = """\nADD A NEW EMPLOYEE:\nPress the “2” key at the Supervisor
+Menu to Add a new Employee. Enter the information that is prompted (First Name,
+Last Name, and Hourly Wage) and press the Enter key after each entry."""
+    print(message)
+    print("\nPress any key to return to the Main Menu.")
+    getchar()
+    return "supervisor_menu"
+
 SCREENS = {
     "main_menu": main_menu,
     "clock_in": clock_in,
     "clock_out": clock_out,
     "supervisor_login": supervisor_login,
-    "supervisor_menu": supervisor_menu
+    "supervisor_menu": supervisor_menu,
+    "sup_help": supervisor_help
 }
 
 def main():
