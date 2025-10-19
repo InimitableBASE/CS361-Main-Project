@@ -30,9 +30,10 @@ KEYS = ['F1',
         'RIGHT']
 
 # VARIABLE GLOBALS
-Cur_Entry = ''       # Used to track the users current entry
+Cur_Entry = ''          # tracks the users entries, passed to next screen
 Employees = {}          # Dictionary to create employees
 Screen = "main_menu"    # Used to specify what screen to go to
+Mod_Emp = []            # Tracks modifications to employee in mod emp screeens
 
 # Temporary Globals DELETE WHEN DONE
     # Temporary Employees Dictionary until one exists
@@ -421,14 +422,8 @@ def view_employee_list():
     global Cur_Entry     
     Cur_Entry = ''      # Clear Cur_Entry for use in this screen.
     print("VIEW HOURLY EMPLOYEE LIST\n")
-    print("Below is a list of Hourly Employees and their Employee ID\n")
-    
-# Employees['1234'] = {   
-#     "first": "Elmer",
-#     "last": "Fudd",
-#     "wage":  "20.00",
-
-
+    if Employees:
+        print("Below is a list of Hourly Employees and their Employee ID\n")
     if not Employees:
         print("EMPLOYEE DATABASE EMPTY")
     else:
@@ -440,12 +435,16 @@ def view_employee_list():
                        colalign=("left", "center")))
     
     print("\nINSTRUCTIONS:")
+    if not Employees:
+        print("Press any key to return to the Supervisor Menu.")
+        getchar()
+        return "supervisor_menu"
     print("Enter an Employee ID and press Enter to view the Employee's "
           "detailed information.")
     print("To return to the Supervisor Menu, press the Escape key (Esc).")
     
+
     print("\nPlease enter the Employee ID: ", end="", flush=True)
-    
     Cur_Entry = getentry()
 
     # User Found, go to details
@@ -469,11 +468,13 @@ def view_employee_list():
 def employee_detail():
     os.system('cls') # Clear Screen
     global Cur_Entry
+    global Mod_Emp
+    eid = Cur_Entry
     print("VIEW EMPLOYEE DETAILS\n")
-    data = [["EMPLOYEE ID:", Cur_Entry]]
-    data.append(["FIRST NAME:",Employees[Cur_Entry]["first"]])
-    data.append(["LAST NAME:",Employees[Cur_Entry]["last"]])
-    data.append(["HOURLY WAGE:",f"${Employees[Cur_Entry]["wage"]}"])
+    data = [["EMPLOYEE ID:", eid]]
+    data.append(["FIRST NAME:",Employees[eid]["first"]])
+    data.append(["LAST NAME:",Employees[eid]["last"]])
+    data.append(["HOURLY WAGE:",f"${Employees[eid]["wage"]}"])
     print(tabulate(data, tablefmt="grid", 
                     colalign=("left", "center")))
 
@@ -490,9 +491,16 @@ def employee_detail():
         if Cur_Entry == "1":
             return "view_list"
         if Cur_Entry == "2":
-            return "mod_emp"
+            # update globals Cur_Entry and Mod_Emp
+            Cur_Entry = eid
+            Mod_Emp.append(Employees[eid]["first"])
+            Mod_Emp.append(Employees[eid]["last"])
+            Mod_Emp.append(Employees[eid]["wage"])
+            Mod_Emp.append(eid) 
+            return "mod_emp_m"
         if Cur_Entry == "3":
-            return "rem_emp"       
+            Cur_Entry = eid
+            return "rem_emp_c"       
 
 
 """ Add Employee Screen (First) """
@@ -598,6 +606,8 @@ def add_employee_wage():
 def add_employee_conf():
     os.system('cls') # Clear Screen
     global Cur_Entry
+    global Mod_Emp
+    Mod_Emp = []
     first = Cur_Entry[0]
     last = Cur_Entry[1]
     wage = Cur_Entry[2]
@@ -623,9 +633,13 @@ def add_employee_conf():
             Cur_Entry = eid
             return "rem_emp_c"
         if Cur_Entry == "3":                                                                        
-            time.sleep(5)                                                       ######## UPDATE
-            print("UNDER CONSTRUCTION")                                         
-            return "supervisor_menu"      
+            # Add first, last, and wage, and EID to Mod_Emp
+            Cur_Entry = eid
+            Mod_Emp.append(first)
+            Mod_Emp.append(last)
+            Mod_Emp.append(wage)
+            Mod_Emp.append(eid) 
+            return "mod_emp_m"        
 
 """ Remove Employee Screen """
 def remove_employee():
@@ -668,13 +682,15 @@ def remove_employee_conf():
     print("REMOVE HOURLY EMPLOYEE\n")
     print("INSTRUCTIONS:")
     print("Select a numerical option from the list below by pressing that "
-          "numbers respective key on the keyboard. Press the Escape key (Esc) "
-          "to return to the Supervisor Menu without removing the employee.")
-    print("\n\t\t\t!!!! WARNING !!!!")
+          "numbers respective key on the keyboard.") 
+    print("Press the Escape key (Esc) to return to the Supervisor Menu "
+          "without removing the employee.\n")
+    print("   !!!! WARNING !!!! WARNING !!!! WARNING !!!! WARNING !!!! WARNING"
+          " !!!! WARNING !!!! WARNING !!!!")
     print("REMOVING THIS EMPLOYEE WILL PREVENT THEM FROM CLOCKING IN WITH "
           "THEIR EMPLOYEE ID. DATA WILL BE LOST.\n")
     
-    print(f"ARE YOU SURE YOU WANT TO PERMANENTLY REMOVE: "
+    print(f"ARE YOU SURE YOU WANT TO PERMANENTLY REMOVE "
           f"{Employees[eid]["first"].upper()} "
           f"{Employees[eid]["last"].upper()} WITH EMPLOYEE ID {eid}?\n")
     print("(1)\tYES - REMOVE EMPLOYEE AND RETURN TO SUPERVISOR MENU")
@@ -689,7 +705,183 @@ def remove_employee_conf():
             return "supervisor_menu"
         if Cur_Entry == "2":
             return "supervisor_menu"
-   
+
+""" Modify Employee Screen """
+def modify_employee():
+    os.system('cls')    # Clear Screen
+    global Cur_Entry
+    global Mod_Emp     
+    Cur_Entry = ''      # Clear Cur_Entry for use in this screen.
+    Mod_Emp = []
+    print("MODIFY HOURLY EMPLOYEE\n")    
+    print("INSTRUCTIONS:")
+    print("Enter the Employee ID of the hourly employee you'd like to remove "
+          "and press Enter.")
+    print("To return to the Supervisor Menu, press the Escape key (Esc).")
+    
+    print("\nPlease enter the Employee ID to modify: ", end="", flush=True)
+    
+    Cur_Entry = getentry()
+
+    # User Found, go to details
+    if Cur_Entry in Employees:
+        # Add first, last, and wage to Mod_Emp
+        iter_cnt = 0 
+        for val in Employees[Cur_Entry].values():
+            if iter_cnt < 3:
+                Mod_Emp.append(val)
+                iter_cnt += 1
+            else:
+                break
+        Mod_Emp.append(Cur_Entry) # Add EID
+        return "mod_emp_m"                                                     
+
+    # User pressed Escape Key, go back to Supervisor menu
+    if Cur_Entry == None:
+        return "supervisor_menu"
+    
+    # Invalid Entry
+    if Cur_Entry not in Employees:
+        print("\nThat is not a valid Employee ID.")
+        print("\nPress the Escape key (Esc) to return to the Supervisor Menu, "
+              "or any other key to try again.")
+        ch = getchar()
+        if ch == '\x1b':
+            return "supervisor_menu"
+        return "mod_emp"    
+
+""" Modify Employee Menu Screen """
+def modify_employee_menu():
+    os.system('cls') # Clear Screen
+    global Mod_Emp
+    eid = Mod_Emp[3]
+
+    print("MODIFY HOURLY EMPLOYEE\n")
+    
+    data = [["EMPLOYEE ID:", Mod_Emp[3]]]
+    data.append(["FIRST NAME:",Mod_Emp[0]])
+    data.append(["LAST NAME:",Mod_Emp[1]])
+    data.append(["HOURLY WAGE:",f"${Mod_Emp[2]}"])
+    print(tabulate(data, tablefmt="grid", 
+                    colalign=("left", "center")))
+    
+    print("\nSelect a numerical option from the list below by pressing that "
+          "numbers respective key on the keyboard.")
+    print("To return to the Supervisor Menu without saving any changes, press "
+          "the Escape key (Esc).")
+    print("(1)\tModify First Name")
+    print("(2)\tModify Last Name")
+    print("(3)\tModify Hourly Wage")
+    print("(4)\tSave changes and return to Supervisor Menu")   
+    while(True):
+        Cur_Entry = getchar()
+        if Cur_Entry == '\x1b':
+            return "supervisor_menu"
+        if Cur_Entry == "1":
+            return "mod_emp_f"
+        if Cur_Entry == "2":
+            return "mod_emp_l"
+        if Cur_Entry == "3":
+            return "mod_emp_w"   
+        if Cur_Entry == "4":
+            iter_cnt = 0 
+            Employees[eid]['first'] = Mod_Emp[0]
+            Employees[eid]['last'] = Mod_Emp[1]
+            Employees[eid]['wage'] = Mod_Emp[2]
+            return "supervisor_menu"   
+
+""" Modiy Employee (First Name) """
+def modify_employee_first():
+    os.system('cls')    # Clear Screen
+    global Mod_Emp
+    # Clear Cur_Entry for use in this screen.  
+    name = ""
+
+    print("MODIFY HOURLY EMPLOYEE FIRST NAME\n")
+    print("INSTRUCTIONS:")
+    print("Modify the hourly employee's first name and press Enter.")
+    print("press the Escape key (Esc)to go back to the Modify Employee Menu.")
+    print(f"\n Current first name: {Mod_Emp[0]}\n")
+
+    print("\nEnter the employee's updated first name: ", end="", flush=True)
+    
+    name = getentry()
+    
+    # User pressed Escape Key, go back to Main menu
+    if name is None:
+        return "mod_emp_m"
+    
+    # Valid Entry Proceed
+    Mod_Emp[0] = name
+    return "mod_emp_m"
+    
+""" Modiy Employee (Last Name) """
+def modify_employee_last():
+    os.system('cls')    # Clear Screen
+    global Mod_Emp
+    # Clear Cur_Entry for use in this screen.  
+    name = ""
+
+    print("MODIFY HOURLY EMPLOYEE FIRST NAME\n")
+    print("INSTRUCTIONS:")
+    print("Modify the hourly employee's last name and press Enter.")
+    print("press the Escape key (Esc)to go back to the Modify Employee Menu.")
+    print(f"\n Current last name: {Mod_Emp[1]}\n")
+
+    print("\nEnter the employee's updated last name: ", end="", flush=True)
+    
+    name = getentry()
+    
+    # User pressed Escape Key, go back to Main menu
+    if name is None:
+        return "mod_emp_m"
+    
+    # Valid Entry Proceed
+    Mod_Emp[1] = name
+    return "mod_emp_m"
+
+""" Modiy Employee (wage) """
+def modify_employee_wage():
+    os.system('cls')    # Clear Screen
+    global Mod_Emp
+    # Clear Cur_Entry for use in this screen.  
+    wage = ""
+
+    print("MODIFY HOURLY EMPLOYEE Wage\n")
+    print("INSTRUCTIONS:")
+    print("Modify the hourly employee's last name and press Enter.")
+    print("press the Escape key (Esc)to go back to the Modify Employee Menu.")
+    print(f"\n Current hourly wage for {Mod_Emp[0]} {Mod_Emp[1]}: "
+          f"{Mod_Emp[2]}\n")
+
+    print("\nEnter the employee's updated hourly wage: ", end="", flush=True)
+    
+    wage = getentry()
+    
+    # User pressed Escape Key, go back to Main menu
+    if wage is None:
+        return "mod_emp_m"
+    
+    #####  TODO: ###########
+    # TODO: Consider Decimal python library for wages
+    #########################
+
+    # remove a leading dollar sign
+    if len(wage) > 0 and wage[0] == '$':
+        wage = wage[1:]
+
+    # Valid Entry Proceed
+    if is_float(wage) and float(wage) > 0:
+        Mod_Emp[2] = str(wage)
+        return "mod_emp_m"
+    else: 
+        print("INVALID ENTRY! Must be a positve number, greater than zero. " 
+        "Press any key to try again or press Escape (Esc) to go back to the "
+        "Modify Employee Menu.")
+        ch = getchar()
+        if ch == '\x1b':
+            return "mod_emp_m"
+        return "mod_emp_w"
 
 SCREENS = {
     "main_menu": main_menu,
@@ -705,10 +897,13 @@ SCREENS = {
     "add_emp_w": add_employee_wage,
     "add_emp_c": add_employee_conf,
     "rem_emp": remove_employee,
-    "rem_emp_c": remove_employee_conf
+    "rem_emp_c": remove_employee_conf,
+    "mod_emp": modify_employee,
+    "mod_emp_m": modify_employee_menu, 
+    "mod_emp_f": modify_employee_first,
+    "mod_emp_l": modify_employee_last,
+    "mod_emp_w": modify_employee_wage
 }
-
-
 
 def main():
     global Screen
