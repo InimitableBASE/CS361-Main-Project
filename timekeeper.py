@@ -49,7 +49,7 @@ def load_employees(filename):
 def save_employees(filename):
     global Employees
     with open(filename, "w", encoding='utf-8') as wf:
-        json.dump(Employees, wf)
+        json.dump(Employees, wf, indent=4)
 
 """Creates Fake Employees"""
 def create_fake_employees():
@@ -181,7 +181,7 @@ def _formatDate(time):
 def _new_clock_in(entry):
     f_name = Employees[entry]['first'].upper()
     l_name = Employees[entry]['last'].upper()
-    time = datetime.now()
+    time = datetime.now().isoformat()
     card = {
             'cit': time, 
             'cot': "",
@@ -190,24 +190,26 @@ def _new_clock_in(entry):
     Employees[entry]['time_cards'].append(card)
     Employees[entry]['clocked_in'] = True
     Employees[entry]['last_clock_in'] = time
-    date = _formatDate(time)
-    time = _formatTime(time)
+    date = _formatDate(datetime.fromisoformat(time))
+    time = _formatTime(datetime.fromisoformat(time))
     # time = Employees[Cur_Entry]['time_cards'][-1]['cit']
     print(f'\n{f_name} {l_name} HAS CLOCKED IN ON {date} AT {time}')
+    
 
 def _new_clock_out(entry):
-    time = datetime.now()        
+    time = datetime.now().isoformat()        
     f_name = Employees[entry]['first'].upper()
     l_name = Employees[entry]['last'].upper()
     Employees[entry]['time_cards'][-1]['cot'] = time
     Employees[entry]['clocked_in'] = False
-    work_duration = time - Employees[entry]['time_cards'][-1]['cit']
+    work_duration = datetime.fromisoformat(time) - \
+        datetime.fromisoformat(Employees[entry]['time_cards'][-1]['cit'])
     sec_worked = work_duration.total_seconds()
     min_worked = sec_worked / 60
     hrs_worked = sec_worked / 3600
     Employees[entry]['time_cards'][-1]['hrs'] = hrs_worked
-    date = _formatDate(time)
-    time = _formatTime(time)
+    date = _formatDate(datetime.fromisoformat(time))
+    time = _formatTime(datetime.fromisoformat(time))
     if hrs_worked < 1:
         print(
             f"\n{f_name} {l_name} WORKED {min_worked:.1f} MINUTES AND CLOCKED "
@@ -296,6 +298,7 @@ def clock_in():
     # User Exists & Not already Clocked in - Clock them in
     elif Cur_Entry in Employees:
         _new_clock_in(Cur_Entry)
+        save_employees(EMP_FILE)
         print("\nPress any key to return to the Main Menu.")
         getchar()
         return "main_menu"
@@ -348,9 +351,10 @@ def clock_out():
             return "main_menu"
         return "clock_out"
     
-    # User Exists & Not already Clocked in - Clock them in
+    # User Exists & Not already Clocked out - Clock them out
     elif Cur_Entry in Employees:
         _new_clock_out(Cur_Entry)
+        save_employees(EMP_FILE)
         print("\nPress any key to return to the Main Menu.")
         getchar()
         return "main_menu"
@@ -945,10 +949,12 @@ def main():
     global EMP_FILE
     if not os.path.exists(EMP_FILE):
         print(f"File: {EMP_FILE} not found.\n")
-        print("Creating Fake Employees")
+        print("Creating Fake Employees for testing.")
         create_fake_employees()
         save_employees(EMP_FILE)
         time.sleep(3)
+    else:
+        load_employees(EMP_FILE)
     while(True):
         print(Screen)
         next_screen = SCREENS[Screen]()
