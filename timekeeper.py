@@ -628,7 +628,7 @@ def add_employee_wage():
             "last_clock_in": None,
             "time_cards": []
         }
-
+        save_employees(EMP_FILE)
         #####  TODO: ###########
         # TODO: Consider Decimal python library for wages
         #########################
@@ -741,6 +741,7 @@ def remove_employee_conf():
             return "supervisor_menu"
         if Cur_Entry == "1":
             del Employees[eid]
+            save_employees(EMP_FILE)
             return "supervisor_menu"
         if Cur_Entry == "2":
             return "supervisor_menu"
@@ -823,10 +824,10 @@ def modify_employee_menu():
         if Cur_Entry == "3":
             return "mod_emp_w"   
         if Cur_Entry == "4":
-            iter_cnt = 0 
             Employees[eid]['first'] = Mod_Emp[0]
             Employees[eid]['last'] = Mod_Emp[1]
             Employees[eid]['wage'] = Mod_Emp[2]
+            save_employees(EMP_FILE)
             return "supervisor_menu"   
 
 """ Modiy Employee (First Name) """
