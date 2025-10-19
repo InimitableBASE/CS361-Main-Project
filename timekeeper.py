@@ -8,6 +8,7 @@ import os
 import msvcrt
 from datetime import datetime
 from tabulate import tabulate
+from random import randint
 import time
 
 # GLOBALS
@@ -182,6 +183,20 @@ def _new_clock_out(entry):
             f" {date} AT {time}"
             )
 
+def is_float(s):
+    try:
+        float(s)
+        return True
+    except ValueError:
+        return False
+
+def generate_eid():
+    while True:
+        rand_num = ""
+        for _ in range(4):
+            rand_num += str(randint(0,9))
+        if rand_num not in Employees:
+            return rand_num 
 
 """Main Menu Screen"""
 def main_menu():
@@ -479,6 +494,108 @@ def employee_detail():
         if Cur_Entry == "3":
             return "rem_emp"       
 
+
+""" Add Employee Screen (First) """
+def add_employee_first():
+    os.system('cls')    # Clear Screen
+    global Cur_Entry
+    Cur_Entry = []      # Clear Cur_Entry for use in this screen.  
+    name = ""
+
+    print("ADD HOURLY EMPLOYEE\n")
+    print("INSTRUCTIONS:")
+    print("Enter the new hourly employee's first name and press Enter.")
+    print("To abandon adding the new employeee and return to the Supervisor "
+          "Menu, press the Escape key (Esc).")
+    
+    print("\nEnter the employee's first name: ", end="", flush=True)
+    
+    name = getentry()
+    
+    # User pressed Escape Key, go back to Main menu
+    if name is None:
+        return "supervisor_menu"
+    
+    # Valid Entry Proceed
+    Cur_Entry.append(name)
+    return "add_emp_l"
+    
+""" Add Employee Screen (Last) """
+def add_employee_last():
+    os.system('cls')    # Clear Screen
+    global Cur_Entry
+    name = ""
+
+    print("ADD HOURLY EMPLOYEE\n")
+    print("INSTRUCTIONS:")
+    print("Enter the new hourly employee's last name and press Enter.")
+    print("To abandon adding the new employeee and return to the Supervisor "
+          "Menu, press the Escape key (Esc).")
+    
+    print("\nEnter the employee's last name: ", end="", flush=True)
+    
+    name = getentry()
+    
+    # User pressed Escape Key, go back to Main menu
+    if name is None:
+        return "supervisor_menu"
+    
+    # Valid Entry Proceed
+    Cur_Entry.append(name)
+    return "add_emp_w"   
+
+""" Add Employee Screen (Wage) """
+def add_employee_wage():
+    os.system('cls')    # Clear Screen
+    global Cur_Entry
+    wage = ""
+
+    print("ADD HOURLY EMPLOYEE\n")
+    print("INSTRUCTIONS:")
+    print("Enter the new hourly employee's wage and press Enter.")
+    print("To abandon adding the new employeee and return to the Supervisor "
+          "Menu, press the Escape key (Esc).")
+    
+    print("\nEnter the employee's starting hourly wage: ", end="", flush=True)
+    
+    wage = getentry()
+    
+    # User pressed Escape Key, go back to Main menu
+    if wage is None:
+        return "supervisor_menu"
+    
+    # remove a leading dollar sign
+    if len(wage) > 0 and wage[0] == '$':
+        wage = wage[1:]
+
+    # Valid Entry Proceed
+    if is_float(wage) and float(wage) > 0:
+        Cur_Entry.append(wage)
+        eid = generate_eid()
+        Employees[eid] = {   
+            "first": Cur_Entry[0],
+            "last": Cur_Entry[1],
+            "wage":  wage,
+            "clocked_in": False,
+            "last_clock_in": None,
+            "time_cards": []
+        }
+
+        #####  Pick Up Here #####
+        # TODO: Consider Decimal python library for wages
+        # TODO: Add Employee Confirmation Page
+        #########################
+        return "supervisor_menu"
+    else: 
+        print("INVALID ENTRY! Must be a positve number, greater than zero. " 
+        "Press any key to try again or press Escape (Esc) to abandon the entry"
+        " and go back to the Supervisor Menu.")
+        ch = getchar()
+        if ch == '\x1b':
+            return "supervisor_menu"
+        return "add_emp_w"
+
+
 SCREENS = {
     "main_menu": main_menu,
     "clock_in": clock_in,
@@ -487,7 +604,10 @@ SCREENS = {
     "supervisor_menu": supervisor_menu,
     "sup_help": supervisor_help,
     "view_list": view_employee_list,
-    "emp_detail": employee_detail
+    "emp_detail": employee_detail,
+    "add_emp": add_employee_first,
+    "add_emp_l": add_employee_last,
+    "add_emp_w": add_employee_wage
 }
 
 
