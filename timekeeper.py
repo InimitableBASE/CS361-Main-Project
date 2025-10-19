@@ -7,11 +7,12 @@
 import os
 import msvcrt
 from datetime import datetime
+from tabulate import tabulate
 import time
 
 # GLOBALS
 EMP_FILE = "employees.json"  # eventually store all employee data in JSON
-PASSWORD = "123456789"
+PASSWORD = "123"
 
 KEYMAP = {
     '3b': 'F1',
@@ -399,14 +400,74 @@ Last Name, and Hourly Wage) and press the Enter key after each entry."""
     getchar()
     return "supervisor_menu"
 
+""" View Hourly Employee List Screen """
+def view_employee_list():
+    os.system('cls')    # Clear Screen
+    Cur_Entry = ''   # Clear Cur_Entry for use in this screen.  
+    
+    print("VIEW HOURLY EMPLOYEE LIST\n")
+    print("Below is a list of Hourly Employees and their Employee ID\n")
+    
+# Employees['1234'] = {   
+#     "first": "Elmer",
+#     "last": "Fudd",
+#     "wage":  "20.00",
+
+
+    if not Employees:
+        print("EMPLOYEE DATABASE EMPTY")
+    else:
+        # print("NAME: EMPLOYEE ID")
+        data = [["EMPLOYEE NAME", "EMPLOYEE ID"]]
+        for key in Employees:
+            name = Employees[key]["first"] + " " + Employees[key]["last"]
+            data.append([name, key])
+            # print(f'{Employees[key]["first"]}', end="")
+            # print(f' {Employees[key]["last"]}:', end="")
+            # print(f' {key}', end="\n")
+        print(tabulate(data, headers="firstrow", tablefmt="grid", 
+                       colalign=("left", "center")))
+    
+    print("\nINSTRUCTIONS:")
+    print("Enter an Employee ID and press Enter to view the Employee's "
+          "detailed information.")
+    print("To return to the Supervisor Menu, press the Escape key (Esc).")
+    
+    print("\nPlease enter the Employee ID: ", end="", flush=True)
+    
+    Cur_Entry = getentry()
+
+    # User Exists and is already clocked out
+    if Cur_Entry in Employees:
+        print("UNDER CONSTRUCTION")
+        time.sleep(3)
+        return "supervisor_menu"
+
+    # User pressed Escape Key, go back to Supervisor menu
+    if Cur_Entry == None:
+        return "supervisor_menu"
+    
+    # Invalid Entry
+    if Cur_Entry not in Employees:
+        print("\nThat is not a valid Employee ID.")
+        print("\nPress the Escape key (Esc) to return to the Supervisor Menu, "
+              "or any other key to try again.")
+        ch = getchar()
+        if ch == '\x1b':
+            return "supervisor_menu"
+        return "view_list"    
+
 SCREENS = {
     "main_menu": main_menu,
     "clock_in": clock_in,
     "clock_out": clock_out,
     "supervisor_login": supervisor_login,
     "supervisor_menu": supervisor_menu,
-    "sup_help": supervisor_help
+    "sup_help": supervisor_help,
+    "view_list": view_employee_list
 }
+
+
 
 def main():
     global Screen
