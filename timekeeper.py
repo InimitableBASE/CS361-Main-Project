@@ -335,9 +335,7 @@ def supervisor_login():
     
     # User Exists & Not already Clocked in - Clock them in
     if Cur_Entry == PASSWORD:
-        print("UNDER CONSTRUCTION")
-        time.sleep(3)
-        return "main_menu"
+        return "supervisor_menu"
 
     # User pressed Escape Key, go back to Main menu
     if Cur_Entry == None:
@@ -353,11 +351,41 @@ def supervisor_login():
             return "main_menu"
         return "supervisor_login"    
 
+def supervisor_menu():
+    os.system('cls') # Clear Screen
+    print("SUPERVISOR MENU\n")
+    print("Select a numerical option from the list below by pressing that "
+          "numbers respective key on the keyboard.")
+    print("To return to the Main Menu, press the Escape key (Esc).")
+    print("(1)\tView Hourly Employee List")
+    print("(2)\tAdd Hourly Employee")
+    print("(3)\tModify Hourly Employee")
+    print("(4)\tRemove Hourly Employee")
+    print("(5)\tView Supervisor Help Menu")
+    print("(6)\tLogout and Return to Main Menu")    
+    while(True):
+        Cur_Entry = getchar()
+        if Cur_Entry == '\x1b':
+            return "main_menu"
+        if Cur_Entry == "1":
+            return "view_list"
+        if Cur_Entry == "2":
+            return "add_emp"
+        if Cur_Entry == "3":
+            return "mod_emp"       
+        if Cur_Entry == "4":
+            return "rem_emp"
+        if Cur_Entry == "5":
+            return "sup_help"       
+        if Cur_Entry == "6":
+            return "main_menu"
+
 SCREENS = {
     "main_menu": main_menu,
     "clock_in": clock_in,
     "clock_out": clock_out,
-    "supervisor_login": supervisor_login
+    "supervisor_login": supervisor_login,
+    "supervisor_menu": supervisor_menu
 }
 
 def main():
