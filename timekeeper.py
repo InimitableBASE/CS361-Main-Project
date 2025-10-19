@@ -10,6 +10,7 @@ from datetime import datetime
 from tabulate import tabulate
 from random import randint
 import time
+import json
 
 # GLOBALS
 EMP_FILE = "employees.json"  # eventually store all employee data in JSON
@@ -37,14 +38,48 @@ Mod_Emp = []            # Tracks modifications to employee in mod emp screeens
 
 # Temporary Globals DELETE WHEN DONE
     # Temporary Employees Dictionary until one exists
-Employees['1234'] = {   
-    "first": "Elmer",
-    "last": "Fudd",
-    "wage":  "20.00",
-    "clocked_in": False,
-    "last_clock_in": None,
-    "time_cards": []
-}
+
+
+"""Function to Load JSON"""
+def load_employees(filename):
+    global Employees
+    with open(filename, "r", encoding='utf-8') as rf:
+        Employees = json.load(rf)
+
+def save_employees(filename):
+    global Employees
+    with open(filename, "w", encoding='utf-8') as wf:
+        json.dump(Employees, wf)
+
+"""Creates Fake Employees"""
+def create_fake_employees():
+    global Employees
+    Employees['1234'] = {   
+        "first": "Elmer",
+        "last": "Fudd",
+        "wage":  "20.00",
+        "clocked_in": False,
+        "last_clock_in": None,
+        "time_cards": []
+    }
+    Employees['4567'] = {   
+        "first": "Buggs",
+        "last": "Bunny",
+        "wage":  "25.00",
+        "clocked_in": False,
+        "last_clock_in": None,
+        "time_cards": []
+    }
+    Employees['7894'] = {   
+        "first": "Yosemite",
+        "last": "Sam",
+        "wage":  "19.00",
+        "clocked_in": False,
+        "last_clock_in": None,
+        "time_cards": []
+    }
+    return
+
 
 """Function that gets keys pressed on keyboard by the user"""
 def getchar():
@@ -907,6 +942,13 @@ SCREENS = {
 
 def main():
     global Screen
+    global EMP_FILE
+    if not os.path.exists(EMP_FILE):
+        print(f"File: {EMP_FILE} not found.\n")
+        print("Creating Fake Employees")
+        create_fake_employees()
+        save_employees(EMP_FILE)
+        time.sleep(3)
     while(True):
         print(Screen)
         next_screen = SCREENS[Screen]()
