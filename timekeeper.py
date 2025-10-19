@@ -473,7 +473,7 @@ def employee_detail():
     data = [["EMPLOYEE ID:", Cur_Entry]]
     data.append(["FIRST NAME:",Employees[Cur_Entry]["first"]])
     data.append(["LAST NAME:",Employees[Cur_Entry]["last"]])
-    data.append(["HOURLY WAGE:",Employees[Cur_Entry]["wage"]])
+    data.append(["HOURLY WAGE:",f"${Employees[Cur_Entry]["wage"]}"])
     print(tabulate(data, tablefmt="grid", 
                     colalign=("left", "center")))
 
@@ -572,6 +572,7 @@ def add_employee_wage():
     if is_float(wage) and float(wage) > 0:
         Cur_Entry.append(wage)
         eid = generate_eid()
+        Cur_Entry.append(eid)
         Employees[eid] = {   
             "first": Cur_Entry[0],
             "last": Cur_Entry[1],
@@ -581,11 +582,10 @@ def add_employee_wage():
             "time_cards": []
         }
 
-        #####  Pick Up Here #####
+        #####  TODO: ###########
         # TODO: Consider Decimal python library for wages
-        # TODO: Add Employee Confirmation Page
         #########################
-        return "supervisor_menu"
+        return "add_emp_c"
     else: 
         print("INVALID ENTRY! Must be a positve number, greater than zero. " 
         "Press any key to try again or press Escape (Esc) to abandon the entry"
@@ -595,6 +595,101 @@ def add_employee_wage():
             return "supervisor_menu"
         return "add_emp_w"
 
+def add_employee_conf():
+    os.system('cls') # Clear Screen
+    global Cur_Entry
+    first = Cur_Entry[0]
+    last = Cur_Entry[1]
+    wage = Cur_Entry[2]
+    eid = Cur_Entry[3]
+    print("ADD HOURLY EMPLOYEE\n")
+    print("INSTRUCTIONS:")
+    print("\nSelect a numerical option from the list below by pressing that "
+          "numbers respective key on the keyboard.")
+    print("To return to the Supervisor Menu, press the Escape key (Esc).")
+    print(f"\n{first} {last} has been added with a wage of "
+          f"${wage}. Their Employee ID is {eid}.\n")
+    print("(1)\tReturn to Supervisor Menu")
+    print(f"(2)\tUNDO: Remove {first} {last} from hourly "
+          "employee list.")
+    print(f"(3)\tREDO: Modify the information for {first} {last}")
+    while(True):
+        Cur_Entry = getchar()
+        if Cur_Entry == '\x1b':
+            return "supervisor_menu"
+        if Cur_Entry == "1":
+            return "supervisor_menu"
+        if Cur_Entry == "2":
+            Cur_Entry = eid
+            return "rem_emp_c"
+        if Cur_Entry == "3":                                                                        
+            time.sleep(5)                                                       ######## UPDATE
+            print("UNDER CONSTRUCTION")                                         
+            return "supervisor_menu"      
+
+""" Remove Employee Screen """
+def remove_employee():
+    os.system('cls')    # Clear Screen
+    global Cur_Entry     
+    Cur_Entry = ''      # Clear Cur_Entry for use in this screen.
+    print("REMOVE HOURLY EMPLOYEE\n")    
+    print("INSTRUCTIONS:")
+    print("Enter the Employee ID of the hourly employee you'd like to remove "
+          "and press Enter.")
+    print("To return to the Supervisor Menu, press the Escape key (Esc).")
+    
+    print("\nPlease enter the Employee ID to remove: ", end="", flush=True)
+    
+    Cur_Entry = getentry()
+
+    # User Found, go to details
+    if Cur_Entry in Employees:
+        return "rem_emp_c"                                                     
+
+    # User pressed Escape Key, go back to Supervisor menu
+    if Cur_Entry == None:
+        return "supervisor_menu"
+    
+    # Invalid Entry
+    if Cur_Entry not in Employees:
+        print("\nThat is not a valid Employee ID.")
+        print("\nPress the Escape key (Esc) to return to the Supervisor Menu, "
+              "or any other key to try again.")
+        ch = getchar()
+        if ch == '\x1b':
+            return "supervisor_menu"
+        return "rem_emp"    
+
+"""Remove Employee Confirmation Screen"""
+def remove_employee_conf():
+    os.system('cls') # Clear Screen
+    global Cur_Entry
+    eid = Cur_Entry
+    print("REMOVE HOURLY EMPLOYEE\n")
+    print("INSTRUCTIONS:")
+    print("Select a numerical option from the list below by pressing that "
+          "numbers respective key on the keyboard. Press the Escape key (Esc) "
+          "to return to the Supervisor Menu without removing the employee.")
+    print("\n\t\t\t!!!! WARNING !!!!")
+    print("REMOVING THIS EMPLOYEE WILL PREVENT THEM FROM CLOCKING IN WITH "
+          "THEIR EMPLOYEE ID. DATA WILL BE LOST.\n")
+    
+    print(f"ARE YOU SURE YOU WANT TO PERMANENTLY REMOVE: "
+          f"{Employees[eid]["first"].upper()} "
+          f"{Employees[eid]["last"].upper()} WITH EMPLOYEE ID {eid}?\n")
+    print("(1)\tYES - REMOVE EMPLOYEE AND RETURN TO SUPERVISOR MENU")
+    print("(2)\tNO - DO NOT REMOVE EMPLOYEE, RETURN TO SUPERVISOR MENU")
+
+    while(True):
+        Cur_Entry = getchar()
+        if Cur_Entry == '\x1b':
+            return "supervisor_menu"
+        if Cur_Entry == "1":
+            del Employees[eid]
+            return "supervisor_menu"
+        if Cur_Entry == "2":
+            return "supervisor_menu"
+   
 
 SCREENS = {
     "main_menu": main_menu,
@@ -607,7 +702,10 @@ SCREENS = {
     "emp_detail": employee_detail,
     "add_emp": add_employee_first,
     "add_emp_l": add_employee_last,
-    "add_emp_w": add_employee_wage
+    "add_emp_w": add_employee_wage,
+    "add_emp_c": add_employee_conf,
+    "rem_emp": remove_employee,
+    "rem_emp_c": remove_employee_conf
 }
 
 
