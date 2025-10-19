@@ -403,8 +403,8 @@ Last Name, and Hourly Wage) and press the Enter key after each entry."""
 """ View Hourly Employee List Screen """
 def view_employee_list():
     os.system('cls')    # Clear Screen
-    Cur_Entry = ''   # Clear Cur_Entry for use in this screen.  
-    
+    global Cur_Entry     
+    Cur_Entry = ''      # Clear Cur_Entry for use in this screen.
     print("VIEW HOURLY EMPLOYEE LIST\n")
     print("Below is a list of Hourly Employees and their Employee ID\n")
     
@@ -417,14 +417,10 @@ def view_employee_list():
     if not Employees:
         print("EMPLOYEE DATABASE EMPTY")
     else:
-        # print("NAME: EMPLOYEE ID")
         data = [["EMPLOYEE NAME", "EMPLOYEE ID"]]
         for key in Employees:
             name = Employees[key]["first"] + " " + Employees[key]["last"]
             data.append([name, key])
-            # print(f'{Employees[key]["first"]}', end="")
-            # print(f' {Employees[key]["last"]}:', end="")
-            # print(f' {key}', end="\n")
         print(tabulate(data, headers="firstrow", tablefmt="grid", 
                        colalign=("left", "center")))
     
@@ -437,11 +433,9 @@ def view_employee_list():
     
     Cur_Entry = getentry()
 
-    # User Exists and is already clocked out
+    # User Found, go to details
     if Cur_Entry in Employees:
-        print("UNDER CONSTRUCTION")
-        time.sleep(3)
-        return "supervisor_menu"
+        return "emp_detail"
 
     # User pressed Escape Key, go back to Supervisor menu
     if Cur_Entry == None:
@@ -457,6 +451,34 @@ def view_employee_list():
             return "supervisor_menu"
         return "view_list"    
 
+def employee_detail():
+    os.system('cls') # Clear Screen
+    global Cur_Entry
+    print("VIEW EMPLOYEE DETAILS\n")
+    data = [["EMPLOYEE ID:", Cur_Entry]]
+    data.append(["FIRST NAME:",Employees[Cur_Entry]["first"]])
+    data.append(["LAST NAME:",Employees[Cur_Entry]["last"]])
+    data.append(["HOURLY WAGE:",Employees[Cur_Entry]["wage"]])
+    print(tabulate(data, tablefmt="grid", 
+                    colalign=("left", "center")))
+
+    print("\nSelect a numerical option from the list below by pressing that "
+          "numbers respective key on the keyboard.")
+    print("To return to the Supervisor Menu, press the Escape key (Esc).")
+    print("(1)\tReturn to Hourly Employee List")
+    print("(2)\tModify Hourly Employee")
+    print("(3)\tRemove Hourly Employee")   
+    while(True):
+        Cur_Entry = getchar()
+        if Cur_Entry == '\x1b':
+            return "supervisor_menu"
+        if Cur_Entry == "1":
+            return "view_list"
+        if Cur_Entry == "2":
+            return "mod_emp"
+        if Cur_Entry == "3":
+            return "rem_emp"       
+
 SCREENS = {
     "main_menu": main_menu,
     "clock_in": clock_in,
@@ -464,7 +486,8 @@ SCREENS = {
     "supervisor_login": supervisor_login,
     "supervisor_menu": supervisor_menu,
     "sup_help": supervisor_help,
-    "view_list": view_employee_list
+    "view_list": view_employee_list,
+    "emp_detail": employee_detail
 }
 
 
