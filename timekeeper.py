@@ -953,7 +953,7 @@ def main():
         print("Creating Fake Employees for testing.")
         create_fake_employees()
         save_employees(EMP_FILE)
-        time.sleep(3)
+        time.sleep(2)
     else:
         load_employees(EMP_FILE)
     while(True):
