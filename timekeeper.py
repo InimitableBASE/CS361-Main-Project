@@ -249,7 +249,7 @@ def main_menu():
     print("(3)\tSUPERVISOR MENU")
     print("(4)\tQUIT")
     print("\n\"Clock In\" tracks when you start work, \"Clock out\" tracks "
-          "when you stop work. Each takes less than a minute to help ensure "
+          "when you stop work. Each takes one minute to help ensure "
           "you are paid for your hard work!")
     print("\nNot sure if you're clocked in or out? Don't worry! You can try "
           "clocking in or clocking out again and the program will tell you if "
