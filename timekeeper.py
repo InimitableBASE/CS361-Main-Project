@@ -14,7 +14,7 @@ import json
 
 # GLOBALS
 EMP_FILE = "employees.json"  # eventually store all employee data in JSON
-PASSWORD = "123"
+PASSWORD = "" # Need to add this password to the program. 
 
 KEYMAP = {
     '3b': 'F1',
