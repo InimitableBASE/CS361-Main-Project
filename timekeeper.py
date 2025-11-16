@@ -41,12 +41,12 @@ Mod_Emp = []            # Tracks modifications to employee in mod emp screeens
 
 
 """Function to Load JSON"""
-def load_employees(filename):
+def load_employees(filename='employees.json'):
     global Employees
     with open(filename, "r", encoding='utf-8') as rf:
         Employees = json.load(rf)
 
-def save_employees(filename):
+def save_employees(filename='employees.json'):
     global Employees
     with open(filename, "w", encoding='utf-8') as wf:
         json.dump(Employees, wf, indent=4)
@@ -236,25 +236,37 @@ def setWage(eid, wage):
 def getClockedIn(eid):
     return Employees[eid]["clocked_in"]
 
-def setClockedIn(eid):
+def setClockedIn(eid, logical):
+    """Toggles Employee Clock in status between True and False"""
+    Employees[eid]["clocked_in"] = logical
+    save_employees()
+
+def toggleClockedIn(eid):
     """Toggles Employee Clock in status between True and False"""
     Employees[eid]["clocked_in"] = not Employees[eid]["clocked_in"]
     save_employees()
 
-def _new_clock_in(entry):
-    f_name = Employees[entry]['first']
+def getLastClockIn(eid):
+    return Employees[eid]["last_clock_in"]
+
+def setLastClockIn(eid, time):
+    Employees[eid]["clocked_in"] = time
+    save_employees()
+
+def _new_clock_in(eid):
+    f_name = getFirstName(eid)
     time = datetime.now().isoformat()
     card = {
             'cit': time, 
             'cot': "",
             'hrs': ""
             }
-    Employees[entry]['time_cards'].append(card)
-    Employees[entry]['clocked_in'] = True
-    Employees[entry]['last_clock_in'] = time
-    time = _formatTime(datetime.fromisoformat(time))
+    Employees[eid]['time_cards'].append(card)
+    setClockedIn(eid, True)
+    setLastClockIn(eid, time)
     greeting = useGreetingMS(f_name)
     print(greeting)
+    time = _formatTime(datetime.fromisoformat(time))
     print(f'YOU CLOCKED IN AT {time}')
     
 
