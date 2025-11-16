@@ -193,25 +193,20 @@ def writeTxt(file_path, text):
     with open(file_path, "w", encoding='utf-8') as f:
         f.write(text)
 
-def useGreetingMS(name):
-    # Define folder and file paths
-    folder_name = "Greet Folder"
-    file_name = "greeting.txt"
-    folder_path = os.path.join(os.getcwd(), folder_name)
-    file_path = os.path.join(folder_path, file_name)
-
-    # Create folder if it doesn't exist
-    os.makedirs(folder_path, exist_ok=True)
-
-    # Write name for Greeting Request 
-    writeTxt(file_path, name)
-
-    # Get Response
-    response = name
+def useService(file_path, text):
+    writeTxt(file_path, text)
+    response = text
     while readTxtFile(file_path) == response:
         continue
     return readTxtFile(file_path)
 
+def useGreetingMS(name):
+    file_path = "Greet Folder\greeting.txt"
+    return useService(file_path, name)
+
+def useHoursWorkedMS(eid):
+    file_path = "workhours.txt"
+    return useService(file_path, eid)
 
 def _new_clock_in(entry):
     f_name = Employees[entry]['first']
@@ -280,8 +275,9 @@ def main_menu():
           "numbers respective key on the keyboard:")
     print("(1)\tCLOCK IN")
     print("(2)\tCLOCK OUT")
-    print("(3)\tSUPERVISOR MENU")
-    print("(4)\tQUIT")
+    print("(3)\tVIEW TIME WORKED")
+    print("(4)\tSUPERVISOR MENU")
+    print("(5)\tQUIT")
     print("\n\"Clock In\" tracks when you start work, \"Clock out\" tracks "
           "when you stop work. Each takes one minute to help ensure "
           "you are paid for your hard work!")
@@ -295,8 +291,10 @@ def main_menu():
         if Cur_Entry == "2":
             return "clock_out"
         if Cur_Entry == "3":
-            return "supervisor_login"       
+            return "hours_worked"   
         if Cur_Entry == "4":
+            return "supervisor_login"       
+        if Cur_Entry == "5":
             return "_quit_"
 
 """ Clock In Screen """
@@ -407,6 +405,48 @@ def clock_out():
         if ch == '\x1b':
             return "main_menu"
         return "clock_out"    
+
+""" Hours Worked Screen """
+def hours_worked():
+    os.system('cls')    # Clear Screen
+    Cur_Entry = ''   # Clear Cur_Entry for use in this screen.  
+    
+    print("VIEW TIME WORKED\n")
+    print("See how much you've worked this pay period!\n")
+    print("INSTRUCTIONS:")
+    print("Enter your Employee ID and press Enter.")
+    print("To return to the Main Menu, press the Escape key (Esc).")
+    
+    print("\nPlease enter your Employee ID: ", end="", flush=True)
+    
+    Cur_Entry = getentry()
+    
+    # User Exists Get Workhours
+    if Cur_Entry in Employees:
+        first = Employees[Cur_Entry]["first"]
+        last = Employees[Cur_Entry]["last"]
+        print(f"\n{first} {last} has worked "
+              f"{useHoursWorkedMS(Cur_Entry +"m")}"
+              f" this pay period.")
+        print("\nPress any key to return to the Main Menu.")
+        getchar()
+        return "main_menu"
+
+    # User pressed Escape Key, go back to Main menu
+    if Cur_Entry == None:
+        return "main_menu"
+    
+    # Invalid Entry
+    if Cur_Entry not in Employees:
+        print("\nThat is not a valid Employee ID. See a Supervisor "
+              "if you have forgotten your Employee ID.")
+        print("\nPress the Escape key (Esc) to return to the Main Menu, or "
+              "any other key to try again.")
+        ch = getchar()
+        if ch == '\x1b':
+            return "main_menu"
+        return "hours_worked"    
+
 
 """ Supervisor Login Screen """
 def supervisor_login():
@@ -961,6 +1001,7 @@ SCREENS = {
     "main_menu": main_menu,
     "clock_in": clock_in,
     "clock_out": clock_out,
+    "hours_worked": hours_worked,
     "supervisor_login": supervisor_login,
     "supervisor_menu": supervisor_menu,
     "sup_help": supervisor_help,
