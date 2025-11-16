@@ -12,9 +12,9 @@ from random import randint
 import time
 import json
 
-# GLOBALS
+# CONSTANT GLOBALS
 EMP_FILE = "employees.json"  # eventually store all employee data in JSON
-PASSWORD = "" # Need to add this password to the program. 
+PASSWORD = "123456" # Need to add this password to the program. 
 
 KEYMAP = {
     '3b': 'F1',
@@ -178,9 +178,43 @@ def _formatTime(time):
 def _formatDate(time):
     return time.strftime('%m/%d/%Y')
 
+def readTxtFile(file_path):
+    """Returns the text from the file at file_path"""
+    try:
+        with open(file_path, "r", encoding='utf-8') as f:
+            text = f.read().strip()
+            return text
+    except FileNotFoundError:
+        text = ""
+        return text
+
+def writeTxt(file_path, text):
+    """Writes the text to the file at file_path"""
+    with open(file_path, "w", encoding='utf-8') as f:
+        f.write(text)
+
+def useGreetingMS(name):
+    # Define folder and file paths
+    folder_name = "Greet Folder"
+    file_name = "greeting.txt"
+    folder_path = os.path.join(os.getcwd(), folder_name)
+    file_path = os.path.join(folder_path, file_name)
+
+    # Create folder if it doesn't exist
+    os.makedirs(folder_path, exist_ok=True)
+
+    # Write name for Greeting Request 
+    writeTxt(file_path, name)
+
+    # Get Response
+    response = name
+    while readTxtFile(file_path) == response:
+        continue
+    return readTxtFile(file_path)
+
+
 def _new_clock_in(entry):
-    f_name = Employees[entry]['first'].upper()
-    l_name = Employees[entry]['last'].upper()
+    f_name = Employees[entry]['first']
     time = datetime.now().isoformat()
     card = {
             'cit': time, 
@@ -190,10 +224,10 @@ def _new_clock_in(entry):
     Employees[entry]['time_cards'].append(card)
     Employees[entry]['clocked_in'] = True
     Employees[entry]['last_clock_in'] = time
-    date = _formatDate(datetime.fromisoformat(time))
     time = _formatTime(datetime.fromisoformat(time))
-    # time = Employees[Cur_Entry]['time_cards'][-1]['cit']
-    print(f'\n{f_name} {l_name} HAS CLOCKED IN ON {date} AT {time}')
+    greeting = useGreetingMS(f_name)
+    print(greeting)
+    print(f'YOU CLOCKED IN AT {time}')
     
 
 def _new_clock_out(entry):
