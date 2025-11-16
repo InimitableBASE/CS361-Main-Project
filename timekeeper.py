@@ -208,6 +208,39 @@ def useHoursWorkedMS(eid):
     file_path = "workhours.txt"
     return useService(file_path, eid)
 
+# Employees Data Structure Get/Set Fuctions
+def getFirstName(eid):
+    return Employees[eid]["first"]
+
+def setFirstName(eid, name):
+    Employees[eid]["first"] = name
+    save_employees()
+
+def getLastName(eid):
+    return Employees[eid]["last"]
+
+def setLastName(eid, name):
+    Employees[eid]["last"] = name
+    save_employees()
+
+def getFullName(eid):
+    return getFirstName(eid) + " " + getLastName(eid)
+
+def getWage(eid):
+    return Employees[eid]["wage"]
+
+def setWage(eid, wage):
+    Employees[eid]["wage"] = wage
+    save_employees()
+
+def getClockedIn(eid):
+    return Employees[eid]["clocked_in"]
+
+def setClockedIn(eid):
+    """Toggles Employee Clock in status between True and False"""
+    Employees[eid]["clocked_in"] = not Employees[eid]["clocked_in"]
+    save_employees()
+
 def _new_clock_in(entry):
     f_name = Employees[entry]['first']
     time = datetime.now().isoformat()
