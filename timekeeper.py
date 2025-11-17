@@ -107,27 +107,22 @@ def getentry():
         
         # If the entry is a keyboard button to ignore:
         if ch == 'IGNORE':
-            continue
-        
+            continue    
         if ch in KEYS:
             continue
-
         # If Entry is Escape Key
         if ch == '\x1b':
             return          
-        
         # If Entry is Backspace
         if ch == '\x08':
             if len(entry) > 0:
                 entry = entry[:-1] # remove last character
                 # move cursor back, print space over it, move cursor back again
                 print("\b \b", end="", flush=True) 
-
         # if the character is printable, add it to the entry
         if ch.isprintable():
             entry += ch
             print(f'{ch}', end="", flush=True)
-
         # if entry is Enter
         if ch == '\r':
             print("", end="\n", flush=False)
@@ -141,31 +136,25 @@ Password is visually hidden during entry.
 def getpassword():
     entry = ''
     while True:
-        ch = getchar()
-        
+        ch = getchar()      
         # If the entry is a keyboard button to ignore:
         if ch == 'IGNORE':
             continue
-        
         if ch in KEYS:
             continue
-
         # If Entry is Escape Key
         if ch == '\x1b':
             return          
-        
         # If Entry is Backspace
         if ch == '\x08':
             if len(entry) > 0:
                 entry = entry[:-1] # remove last character
                 # move cursor back, print space over it, move cursor back again
                 print("\b \b", end="", flush=True) 
-
         # if the character is printable, add it to the entry
         if ch.isprintable():
             entry += ch
             print("*", end="", flush=True)
-
         # if entry is Enter
         if ch == '\r':
             print("", end="\n", flush=False)
@@ -253,6 +242,14 @@ def setLastClockIn(eid, time):
     Employees[eid]["clocked_in"] = time
     save_employees()
 
+def showEmployeeList():
+    data = [["EMPLOYEE NAME", "EMPLOYEE ID"]]
+    for key in Employees:
+        name = getFullName(key)
+        data.append([name, key])
+    print(tabulate(data, headers="firstrow", tablefmt="grid", 
+            colalign=("left", "center")))
+
 def _new_clock_in(eid):
     f_name = getFirstName(eid)
     time = datetime.now().isoformat()
@@ -316,9 +313,10 @@ def main_menu():
     print("\t\t\t\tWELCOME TO TIMEKEEPER!")
     print("\t\tThe program that tracks your work hours so you can get paid!\n")
     print("MAIN MENU\n")
-    print("Select a numerical option from the list below by pressing that "
+    print("INSTRUCTIONS:")
+    print("- Select a numerical option from the list below by pressing that "
           "numbers respective key on the keyboard:")
-    print("(1)\tCLOCK IN")
+    print("\n(1)\tCLOCK IN")
     print("(2)\tCLOCK OUT")
     print("(3)\tVIEW TIME WORKED")
     print("(4)\tSUPERVISOR MENU")
@@ -350,10 +348,10 @@ def clock_in():
     print("CLOCK IN\n")
     print("Clocking in tracks when you start work.\n")
     print("INSTRUCTIONS:")
-    print("To clock in for work, please enter your Employee ID and press "
+    print("- To clock in for work, please enter your Employee ID and press "
           "Enter.")
-    print("To return to the Main Menu, press the Escape key (Esc).")
-    print("\nNot sure if you're clocked in? Don't worry! You can try clocking "
+    print("- To return to the Main Menu, press the Escape key (Esc).")
+    print("- Not sure if you're clocked in? Try clocking "
           "in and the program will tell you if you are already clocked in!")
     
     print("\nPlease enter your Employee ID: ", end="", flush=True)
@@ -403,11 +401,11 @@ def clock_out():
     print("CLOCK OUT\n")
     print("Clocking out tracks when you stop work.\n")
     print("INSTRUCTIONS:")
-    print("To clock out from work, please enter your Employee ID and press "
+    print("- To clock out from work, please enter your Employee ID and press "
           "Enter.")
-    print("To return to the Main Menu, press the Escape key (Esc).")
-    print("\nNot sure if you're clocked out? Don't worry! You can try clocking"
-          " out again and the program will tell you if you are already "
+    print("- To return to the Main Menu, press the Escape key (Esc).")
+    print("\nNot sure if you're clocked out? Try clocking"
+          " out and the program will tell you if you are already "
           "clocked out!")
     
     print("\nPlease enter your Employee ID: ", end="", flush=True)
@@ -459,8 +457,8 @@ def hours_worked():
     print("VIEW TIME WORKED\n")
     print("See how much you've worked this pay period!\n")
     print("INSTRUCTIONS:")
-    print("Enter your Employee ID and press Enter.")
-    print("To return to the Main Menu, press the Escape key (Esc).")
+    print("- Enter your Employee ID and press Enter.")
+    print("- To return to the Main Menu, press the Escape key (Esc).")
     
     print("\nPlease enter your Employee ID: ", end="", flush=True)
     
@@ -500,9 +498,9 @@ def supervisor_login():
     
     print("SUPERVISOR LOGIN\n")
     print("INSTRUCTIONS:")
-    print("To access the Supervisor Menu, please enter the supervisor password"
+    print("- To access the Supervisor Menu, please enter the supervisor password"
           " press Enter.")
-    print("To return to the Main Menu, press the Escape key (Esc).")
+    print("- To return to the Main Menu, press the Escape key (Esc).")
     
     print("\nSupervisor Password: ", end="", flush=True)
     
@@ -529,10 +527,11 @@ def supervisor_login():
 def supervisor_menu():
     os.system('cls') # Clear Screen
     print("SUPERVISOR MENU\n")
-    print("Select a numerical option from the list below by pressing that "
+    print("INSTRUCTIONS:")
+    print("- Select a numerical option from the list below by pressing that "
           "numbers respective key on the keyboard.")
-    print("To return to the Main Menu, press the Escape key (Esc).")
-    print("(1)\tView Hourly Employee List")
+    print("- To return to the Main Menu, press the Escape key (Esc).")
+    print("\n(1)\tView Hourly Employee List")
     print("(2)\tAdd Hourly Employee")
     print("(3)\tModify Hourly Employee")
     print("(4)\tRemove Hourly Employee")
@@ -580,28 +579,18 @@ def view_employee_list():
     global Cur_Entry     
     Cur_Entry = ''      # Clear Cur_Entry for use in this screen.
     print("VIEW HOURLY EMPLOYEE LIST\n")
-    if Employees:
-        print("Below is a list of Hourly Employees and their Employee ID\n")
     if not Employees:
         print("EMPLOYEE DATABASE EMPTY")
     else:
-        data = [["EMPLOYEE NAME", "EMPLOYEE ID"]]
-        for key in Employees:
-            name = Employees[key]["first"] + " " + Employees[key]["last"]
-            data.append([name, key])
-        print(tabulate(data, headers="firstrow", tablefmt="grid", 
-                       colalign=("left", "center")))
-    
+        showEmployeeList()
     print("\nINSTRUCTIONS:")
     if not Employees:
-        print("Press any key to return to the Supervisor Menu.")
+        print("- Press any key to return to the Supervisor Menu.")
         getchar()
         return "supervisor_menu"
-    print("Enter an Employee ID and press Enter to view the Employee's "
+    print("- Enter an Employee ID and press Enter to view the Employee's "
           "detailed information.")
-    print("To return to the Supervisor Menu, press the Escape key (Esc).")
-    
-
+    print("- To return to the Supervisor Menu, press the Escape key (Esc).")
     print("\nPlease enter the Employee ID: ", end="", flush=True)
     Cur_Entry = getentry()
 
@@ -635,11 +624,11 @@ def employee_detail():
     data.append(["HOURLY WAGE:",f"${Employees[eid]["wage"]}"])
     print(tabulate(data, tablefmt="grid", 
                     colalign=("left", "center")))
-
-    print("\nSelect a numerical option from the list below by pressing that "
+    print("\nINSTRUCTIONS:")
+    print("- Select a numerical option from the list below by pressing that "
           "numbers respective key on the keyboard.")
-    print("To return to the Supervisor Menu, press the Escape key (Esc).")
-    print("(1)\tReturn to Hourly Employee List")
+    print("- To return to the Supervisor Menu, press the Escape key (Esc).")
+    print("\n(1)\tReturn to Hourly Employee List")
     print("(2)\tModify Hourly Employee")
     print("(3)\tRemove Hourly Employee")   
     while(True):
@@ -670,8 +659,8 @@ def add_employee_first():
 
     print("ADD HOURLY EMPLOYEE\n")
     print("INSTRUCTIONS:")
-    print("Enter the new hourly employee's first name and press Enter.")
-    print("To abandon adding the new employeee and return to the Supervisor "
+    print("- Enter the new hourly employee's first name and press Enter.")
+    print("- To abandon adding the new employeee and return to the Supervisor "
           "Menu, press the Escape key (Esc).")
     
     print("\nEnter the employee's first name: ", end="", flush=True)
@@ -694,8 +683,8 @@ def add_employee_last():
 
     print("ADD HOURLY EMPLOYEE\n")
     print("INSTRUCTIONS:")
-    print("Enter the new hourly employee's last name and press Enter.")
-    print("To abandon adding the new employeee and return to the Supervisor "
+    print("- Enter the new hourly employee's last name and press Enter.")
+    print("- To abandon adding the new employeee and return to the Supervisor "
           "Menu, press the Escape key (Esc).")
     
     print("\nEnter the employee's last name: ", end="", flush=True)
@@ -718,8 +707,8 @@ def add_employee_wage():
 
     print("ADD HOURLY EMPLOYEE\n")
     print("INSTRUCTIONS:")
-    print("Enter the new hourly employee's wage and press Enter.")
-    print("To abandon adding the new employeee and return to the Supervisor "
+    print("- Enter the new hourly employee's wage and press Enter.")
+    print("- To abandon adding the new employeee and return to the Supervisor "
           "Menu, press the Escape key (Esc).")
     
     print("\nEnter the employee's starting hourly wage: ", end="", flush=True)
@@ -771,13 +760,15 @@ def add_employee_conf():
     wage = Cur_Entry[2]
     eid = Cur_Entry[3]
     print("ADD HOURLY EMPLOYEE\n")
+    print(f"{first} {last} has been added with a wage of "
+        f"${wage}. Their Employee ID is {eid}.\n")
+
     print("INSTRUCTIONS:")
-    print("\nSelect a numerical option from the list below by pressing that "
+    print("- Select a numerical option from the list below by pressing that "
           "numbers respective key on the keyboard.")
-    print("To return to the Supervisor Menu, press the Escape key (Esc).")
-    print(f"\n{first} {last} has been added with a wage of "
-          f"${wage}. Their Employee ID is {eid}.\n")
-    print("(1)\tReturn to Supervisor Menu")
+    print("- To return to the Supervisor Menu, press the Escape key (Esc).")
+
+    print("\n(1)\tReturn to Supervisor Menu")
     print(f"(2)\tUNDO: Remove {first} {last} from hourly "
           "employee list.")
     print(f"(3)\tREDO: Modify the information for {first} {last}")
@@ -804,11 +795,12 @@ def remove_employee():
     os.system('cls')    # Clear Screen
     global Cur_Entry     
     Cur_Entry = ''      # Clear Cur_Entry for use in this screen.
-    print("REMOVE HOURLY EMPLOYEE\n")    
-    print("INSTRUCTIONS:")
-    print("Enter the Employee ID of the hourly employee you'd like to remove "
+    print("REMOVE HOURLY EMPLOYEE\n")
+    showEmployeeList()    
+    print("\nINSTRUCTIONS:")
+    print("- Enter the Employee ID of the hourly employee you'd like to remove "
           "and press Enter.")
-    print("To return to the Supervisor Menu, press the Escape key (Esc).")
+    print("- To return to the Supervisor Menu, press the Escape key (Esc).")
     
     print("\nPlease enter the Employee ID to remove: ", end="", flush=True)
     
@@ -872,11 +864,12 @@ def modify_employee():
     global Mod_Emp     
     Cur_Entry = ''      # Clear Cur_Entry for use in this screen.
     Mod_Emp = []
-    print("MODIFY HOURLY EMPLOYEE\n")    
-    print("INSTRUCTIONS:")
-    print("Enter the Employee ID of the hourly employee you'd like to remove "
+    print("MODIFY HOURLY EMPLOYEE\n")
+    showEmployeeList()    
+    print("\nINSTRUCTIONS:")
+    print("- Enter the Employee ID of the employee you'd like to modify "
           "and press Enter.")
-    print("To return to the Supervisor Menu, press the Escape key (Esc).")
+    print("- To return to the Supervisor Menu, press the Escape key (Esc).")
     
     print("\nPlease enter the Employee ID to modify: ", end="", flush=True)
     
@@ -923,12 +916,12 @@ def modify_employee_menu():
     data.append(["HOURLY WAGE:",f"${Mod_Emp[2]}"])
     print(tabulate(data, tablefmt="grid", 
                     colalign=("left", "center")))
-    
-    print("\nSelect a numerical option from the list below by pressing that "
+    print("\nINSTRUCTIONS:")
+    print("- Select a numerical option from the list below by pressing that "
           "numbers respective key on the keyboard.")
-    print("To return to the Supervisor Menu without saving any changes, press "
+    print("- To return to the Supervisor Menu without saving any changes, press "
           "the Escape key (Esc).")
-    print("(1)\tModify First Name")
+    print("\n(1)\tModify First Name")
     print("(2)\tModify Last Name")
     print("(3)\tModify Hourly Wage")
     print("(4)\tSave changes and return to Supervisor Menu")   
@@ -943,10 +936,9 @@ def modify_employee_menu():
         if Cur_Entry == "3":
             return "mod_emp_w"   
         if Cur_Entry == "4":
-            Employees[eid]['first'] = Mod_Emp[0]
-            Employees[eid]['last'] = Mod_Emp[1]
-            Employees[eid]['wage'] = Mod_Emp[2]
-            save_employees(EMP_FILE)
+            setFirstName(eid, Mod_Emp[0])
+            setLastName(eid, Mod_Emp[1])
+            setWage(eid, Mod_Emp[2])
             return "supervisor_menu"   
 
 """ Modiy Employee (First Name) """
