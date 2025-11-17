@@ -197,6 +197,10 @@ def useHoursWorkedMS(eid):
     file_path = "workhours.txt"
     return useService(file_path, eid)
 
+def useClockEmpOutMS(text):
+    file_path = "clockout.txt"
+    return useService(file_path, text)
+
 # Employees Data Structure Get/Set Fuctions
 def getFirstName(eid):
     return Employees[eid]["first"]
@@ -635,8 +639,9 @@ def sup_clock_out_all():
         if Cur_Entry == '\x1b':
             return "clock_status"
         if Cur_Entry == "1":
-            # TODO: Implement Microservice
-            pass
+            useClockEmpOutMS("all")
+            load_employees()
+            return "clock_status"
         if Cur_Entry == "2":
             return "clock_status"
 
@@ -663,13 +668,25 @@ def sup_clock_out_emp():
     Cur_Entry = getentry()
 
     # User Found, clock them out
-    if Cur_Entry in Employees:
+    if Cur_Entry in Employees and getClockedIn(Cur_Entry):
         new_clock_out(Cur_Entry)
         name = getFullName(Cur_Entry)
         print(f"\n {name} has been clocked out.")
         print("\nPress any key to return to the Employee Clock Status Menu.")
         getchar()
         return "clock_status"
+
+    # User Found, but clocked out already
+    if Cur_Entry in Employees and not getClockedIn(Cur_Entry):
+        name = getFullName(Cur_Entry)
+        print(f"\n {name} is already clocked out.")
+        print("\nPress the Escape key (Esc) to return to the Employee Clock "
+              "Status Menu, or any other key to try again.")
+        ch = getchar()
+        if ch == '\x1b':
+            return "clock_status"
+        return "sup_clock_out_emp"    
+
 
     # User pressed Escape Key, go back to Supervisor menu
     if Cur_Entry == None:
