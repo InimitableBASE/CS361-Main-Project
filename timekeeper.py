@@ -239,8 +239,26 @@ def getLastClockIn(eid):
     return Employees[eid]["last_clock_in"]
 
 def setLastClockIn(eid, time):
-    Employees[eid]["clocked_in"] = time
+    Employees[eid]["last_clock_in"] = time
     save_employees()
+
+def getLastClockOut(eid):
+    card_count = len(Employees[eid]["time_cards"])
+    if card_count == 0:
+        return None
+    for i in range(card_count-1, -1, -1):
+        if Employees[eid]["time_cards"][i]["cot"] != "":
+            return Employees[eid]["time_cards"][i]["cot"]
+    return None
+
+def getLastHrs(eid):
+    card_count = len(Employees[eid]["time_cards"])
+    if card_count == 0:
+        return None
+    for i in range(card_count-1, -1, -1):
+        if Employees[eid]["time_cards"][i]["hrs"] != "":
+            return Employees[eid]["time_cards"][i]["hrs"]
+    return None
 
 def showEmployeeList():
     data = [["EMPLOYEE NAME", "EMPLOYEE ID"]]
@@ -250,7 +268,19 @@ def showEmployeeList():
     print(tabulate(data, headers="firstrow", tablefmt="grid", 
             colalign=("left", "center")))
 
-def _new_clock_in(eid):
+def showEmployeeStatus():
+    data = [["EMPLOYEE NAME", "EMPLOYEE ID", "STATUS"]]
+    for key in Employees:
+        name = getFullName(key)
+        if getClockedIn(key):
+            status = "Clocked In"
+        else:
+            status = "Clocked Out"
+        data.append([name, key, status])
+    print(tabulate(data, headers="firstrow", tablefmt="grid", 
+            colalign=("left", "center", "center")))
+
+def new_clock_in(eid):
     f_name = getFirstName(eid)
     time = datetime.now().isoformat()
     card = {
@@ -261,37 +291,18 @@ def _new_clock_in(eid):
     Employees[eid]['time_cards'].append(card)
     setClockedIn(eid, True)
     setLastClockIn(eid, time)
-    greeting = useGreetingMS(f_name)
-    print(greeting)
-    time = _formatTime(datetime.fromisoformat(time))
-    print(f'YOU CLOCKED IN AT {time}')
+    save_employees()
     
-
-def _new_clock_out(entry):
-    time = datetime.now().isoformat()        
-    f_name = Employees[entry]['first'].upper()
-    l_name = Employees[entry]['last'].upper()
+def new_clock_out(entry):
+    time = datetime.now().isoformat()     
     Employees[entry]['time_cards'][-1]['cot'] = time
-    Employees[entry]['clocked_in'] = False
+    toggleClockedIn(entry)
     work_duration = datetime.fromisoformat(time) - \
-        datetime.fromisoformat(Employees[entry]['time_cards'][-1]['cit'])
-    sec_worked = work_duration.total_seconds()
-    min_worked = sec_worked / 60
-    hrs_worked = sec_worked / 3600
+        datetime.fromisoformat(getLastClockIn(entry))
+    hrs_worked = work_duration.total_seconds() / 3600
     Employees[entry]['time_cards'][-1]['hrs'] = hrs_worked
-    date = _formatDate(datetime.fromisoformat(time))
-    time = _formatTime(datetime.fromisoformat(time))
-    if hrs_worked < 1:
-        print(
-            f"\n{f_name} {l_name} WORKED {min_worked:.1f} MINUTES AND CLOCKED "
-            f"OUT ON {date} AT {time}"
-            )   
-    else:
-        print(
-            f"\n{f_name} {l_name} WORKED {hrs_worked} HOURS AND CLOCKED OUT ON"
-            f" {date} AT {time}"
-            )
-
+    save_employees()
+    
 def is_float(s):
     try:
         float(s)
@@ -372,8 +383,11 @@ def clock_in():
     
     # User Exists & Not already Clocked in - Clock them in
     elif Cur_Entry in Employees:
-        _new_clock_in(Cur_Entry)
+        new_clock_in(Cur_Entry) 
         save_employees(EMP_FILE)
+        print(useGreetingMS(getFirstName(Cur_Entry)))
+        time = _formatTime(datetime.fromisoformat(getLastClockIn(Cur_Entry)))
+        print(f'YOU CLOCKED IN AT {time}')
         print("\nPress any key to return to the Main Menu.")
         getchar()
         return "main_menu"
@@ -413,10 +427,8 @@ def clock_out():
     Cur_Entry = getentry()
 
     # User Exists and is already clocked out
-    if Cur_Entry in Employees and not Employees[Cur_Entry]["clocked_in"]:
-        f_name = Employees[Cur_Entry]['first'].upper()
-        l_name = Employees[Cur_Entry]['last'].upper()
-        print(f'\n{f_name} {l_name} IS ALREADY CLOCKED OUT!') 
+    if Cur_Entry in Employees and not getClockedIn(Cur_Entry):
+        print(f'\n{getFullName(Cur_Entry).upper()} IS ALREADY CLOCKED OUT!') 
         print("\nYou must clock in before you may clock out. If you forgot to "
               "clock in for work, see a Supervisor.")
         print("\nPress the Escape key (Esc) to return to the Main Menu, or "
@@ -428,8 +440,26 @@ def clock_out():
     
     # User Exists & Not already Clocked out - Clock them out
     elif Cur_Entry in Employees:
-        _new_clock_out(Cur_Entry)
-        save_employees(EMP_FILE)
+        new_clock_out(Cur_Entry)
+        name = getFullName(Cur_Entry)
+        # sec_worked = work_duration.total_seconds()
+        # min_worked = sec_worked / 60
+        # hrs_worked = sec_worked / 3600
+        outTime = getLastClockOut(Cur_Entry)
+        hrs_worked = float(getLastHrs(Cur_Entry))
+        min_worked = hrs_worked * 60
+        date = _formatDate(datetime.fromisoformat(outTime))
+        time = _formatTime(datetime.fromisoformat(outTime))
+        if hrs_worked < 1:
+            print(
+                f"\n{name} WORKED {min_worked:.1f} MINUTES AND CLOCKED "
+                f"OUT ON {date} AT {time}"
+                )   
+        else:
+            print(
+                f"\n{name} WORKED {hrs_worked:.2f} HOURS AND CLOCKED OUT ON"
+                f" {date} AT {time}"
+                )
         print("\nPress any key to return to the Main Menu.")
         getchar()
         return "main_menu"
@@ -531,11 +561,11 @@ def supervisor_menu():
     print("- Select a numerical option from the list below by pressing that "
           "numbers respective key on the keyboard.")
     print("- To return to the Main Menu, press the Escape key (Esc).")
-    print("\n(1)\tView Hourly Employee List")
+    print("\n(1)\tView Employee Details")
     print("(2)\tAdd Hourly Employee")
     print("(3)\tModify Hourly Employee")
     print("(4)\tRemove Hourly Employee")
-    print("(5)\tView Supervisor Help Menu")
+    print("(5)\tView Employees Clock Status")
     print("(6)\tLogout and Return to Main Menu")    
     while(True):
         Cur_Entry = getchar()
@@ -550,35 +580,117 @@ def supervisor_menu():
         if Cur_Entry == "4":
             return "rem_emp"
         if Cur_Entry == "5":
-            return "sup_help"       
+            return "clock_status"       
         if Cur_Entry == "6":
             return "main_menu"
 
-def supervisor_help():
+def clock_status():
+    os.system('cls')    # Clear Screen
+    global Cur_Entry     
+    Cur_Entry = ''      # Clear Cur_Entry for use in this screen.
+    print("VIEW EMPLOYEE CLOCK STATUS\n")
+    if not Employees:
+        print("EMPLOYEE DATABASE EMPTY")
+    else:
+        showEmployeeStatus()
+    print("\nINSTRUCTIONS:")
+    if not Employees:
+        print("- Press any key to return to the Supervisor Menu.")
+        getchar()
+        return "supervisor_menu"
+    print("- Select a numerical option from the list below by pressing that "
+          "numbers respective key on the keyboard.")
+    print("- To return to the Supervisor Menu, press the Escape key (Esc).")
+    print("\n(1)\tClock Out All Employees")
+    print("(2)\tClock Out A Single Employee")
+    print("(3)\tLogout and Return to Supervisor Menu")    
+    while(True):
+        Cur_Entry = getchar()
+        if Cur_Entry == '\x1b':
+            return "supervisor_menu"
+        if Cur_Entry == "1":
+            return "sup_clock_out_all"
+        if Cur_Entry == "2":
+            return "sup_clock_out_emp"
+        if Cur_Entry == "3":
+            return "supervisor_menu"
+
+"""Clock Out All Confirmation Screen"""
+def sup_clock_out_all():
     os.system('cls') # Clear Screen
-    print("SUPERVISOR MENU HELP")
-    print("\nTo return to the Supervisor Menu, press any key.\n")
-    message = """TO VIEW EMPLOYEE INFORMATION AND MODIFY OR REMOVE THEM: 
-To view the Employee List, Press the “1” key at the Supervisor Menu. This 
-will display a list of Hourly Employees and their Employee ID. Enter an 
-Employee ID and press the Enter key to see details about that Employee. To 
-Modify that Employee's Information press the “2” Key. To Remove that Employee, 
-press the “3” Key."""
-    print(message)
-    message = """\nADD A NEW EMPLOYEE:\nPress the “2” key at the Supervisor
-Menu to Add a new Employee. Enter the information that is prompted (First Name,
-Last Name, and Hourly Wage) and press the Enter key after each entry."""
-    print(message)
-    print("\nPress any key to return to the Main Menu.")
-    getchar()
-    return "supervisor_menu"
+    global Cur_Entry
+    eid = Cur_Entry
+    print("CLOCK OUT ALL EMPLOYEES\n")
+    print("INSTRUCTIONS:")
+    print("- Select a numerical option from the list below by pressing that "
+          "numbers respective key on the keyboard.") 
+    print("- To return to the Employee Clock Status Menu, press the Escape "
+          "key (Esc).")
+    print(f"ARE YOU SURE YOU WANT TO CLOCKOUT ALL EMPLOYEES?")
+    print("(1)\tYES - CLOCK OUT ALL EMPLOYEES")
+    print("(2)\tNO - RETURN TO EMPLOYEE CLOCK STATUS MENU")
+
+    while(True):
+        Cur_Entry = getchar()
+        if Cur_Entry == '\x1b':
+            return "clock_status"
+        if Cur_Entry == "1":
+            # TODO: Implement Microservice
+            pass
+        if Cur_Entry == "2":
+            return "clock_status"
+
+
+""" Clock Out One Employee Screen """
+def sup_clock_out_emp():
+    os.system('cls')    # Clear Screen
+    global Cur_Entry     
+    Cur_Entry = ''      # Clear Cur_Entry for use in this screen.
+    print("CLOCK OUT EMPLOYEE\n")
+    if not Employees:
+        print("EMPLOYEE DATABASE EMPTY")
+    else:
+        showEmployeeStatus()
+    print("\nINSTRUCTIONS:")
+    if not Employees:
+        print("- Press any key to return to the Supervisor Menu.")
+        getchar()
+        return "supervisor_menu"
+    print("- Enter an Employee ID to clock them out.")
+    print("- To return to the Employee Clock Status Menu, press the Escape "
+          "key (Esc).")
+    print("\nPlease enter the Employee ID: ", end="", flush=True)
+    Cur_Entry = getentry()
+
+    # User Found, clock them out
+    if Cur_Entry in Employees:
+        new_clock_out(Cur_Entry)
+        name = getFullName(Cur_Entry)
+        print(f"\n {name} has been clocked out.")
+        print("\nPress any key to return to the Employee Clock Status Menu.")
+        getchar()
+        return "clock_status"
+
+    # User pressed Escape Key, go back to Supervisor menu
+    if Cur_Entry == None:
+        return "clock_status"
+    
+    # Invalid Entry
+    if Cur_Entry not in Employees:
+        print("\nThat is not a valid Employee ID.")
+        print("\nPress the Escape key (Esc) to return to the Employee Clock "
+              "Status Menu, or any other key to try again.")
+        ch = getchar()
+        if ch == '\x1b':
+            return "clock_status"
+        return "sup_clock_out_emp"    
 
 """ View Hourly Employee List Screen """
 def view_employee_list():
     os.system('cls')    # Clear Screen
     global Cur_Entry     
     Cur_Entry = ''      # Clear Cur_Entry for use in this screen.
-    print("VIEW HOURLY EMPLOYEE LIST\n")
+    print("VIEW EMPLOYEE DETAILS\n")
     if not Employees:
         print("EMPLOYEE DATABASE EMPTY")
     else:
@@ -619,9 +731,9 @@ def employee_detail():
     eid = Cur_Entry
     print("VIEW EMPLOYEE DETAILS\n")
     data = [["EMPLOYEE ID:", eid]]
-    data.append(["FIRST NAME:",Employees[eid]["first"]])
-    data.append(["LAST NAME:",Employees[eid]["last"]])
-    data.append(["HOURLY WAGE:",f"${Employees[eid]["wage"]}"])
+    data.append(["FIRST NAME:",getFirstName(eid)])
+    data.append(["LAST NAME:",getLastName(eid)])
+    data.append(["HOURLY WAGE:",f"${getWage(eid)}"])
     print(tabulate(data, tablefmt="grid", 
                     colalign=("left", "center")))
     print("\nINSTRUCTIONS:")
@@ -1041,7 +1153,7 @@ SCREENS = {
     "hours_worked": hours_worked,
     "supervisor_login": supervisor_login,
     "supervisor_menu": supervisor_menu,
-    "sup_help": supervisor_help,
+    "clock_status": clock_status,
     "view_list": view_employee_list,
     "emp_detail": employee_detail,
     "add_emp": add_employee_first,
@@ -1054,7 +1166,9 @@ SCREENS = {
     "mod_emp_m": modify_employee_menu, 
     "mod_emp_f": modify_employee_first,
     "mod_emp_l": modify_employee_last,
-    "mod_emp_w": modify_employee_wage
+    "mod_emp_w": modify_employee_wage,
+    "sup_clock_out_emp": sup_clock_out_emp,
+    "sup_clock_out_all": sup_clock_out_all,
 }
 
 def main():
