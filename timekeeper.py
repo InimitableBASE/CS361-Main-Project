@@ -3,7 +3,7 @@
 
 # UI currently works exclusively for windows based systems. 
 
-# IMPORTED LIBRARIES
+# LIBRARIES USED
 import os
 import msvcrt
 from datetime import datetime
