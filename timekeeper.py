@@ -201,6 +201,10 @@ def useClockEmpOutMS(text):
     file_path = "clockout.txt"
     return useService(file_path, text)
 
+def useNum2WordsMS(num):
+    file_path = "convertnumber.txt"
+    return useService(file_path, num)
+
 # Employees Data Structure Get/Set Fuctions
 def getFirstName(eid):
     return Employees[eid]["first"]
@@ -1163,6 +1167,72 @@ def modify_employee_wage():
             return "mod_emp_m"
         return "mod_emp_w"
 
+""" Payroll Menu """
+def payroll_menu():
+    os.system('cls')    # Clear Screen
+    global Cur_Entry     
+    Cur_Entry = ''      # Clear Cur_Entry for use in this screen.
+    print("PAYROLL MENU\n")
+    if not Employees:
+        print("EMPLOYEE DATABASE EMPTY")
+    else:
+        showEmployeeList()
+    print("\nINSTRUCTIONS:")
+    if not Employees:
+        print("- Press any key to return to the Supervisor Menu.")
+        getchar()
+        return "supervisor_menu"
+    print("- Enter an Employee ID and press Enter to get the Employee's "
+          "current paycheck information.")
+    print("- To return to the Supervisor Menu, press the Escape key (Esc).")
+    print("\nPlease enter the Employee ID: ", end="", flush=True)
+    Cur_Entry = getentry()
+
+    # User Found, go to details
+    if Cur_Entry in Employees:
+        return "emp_detail"
+
+    # User pressed Escape Key, go back to Supervisor menu
+    if Cur_Entry == None:
+        return "supervisor_menu"
+    
+    # Invalid Entry
+    if Cur_Entry not in Employees:
+        print("\nThat is not a valid Employee ID.")
+        print("\nPress the Escape key (Esc) to return to the Supervisor Menu, "
+              "or any other key to try again.")
+        ch = getchar()
+        if ch == '\x1b':
+            return "supervisor_menu"
+        return "payroll_menu"    
+
+"""Remove Employee Confirmation Screen"""
+def paycheck_menu():
+    os.system('cls') # Clear Screen
+    global Cur_Entry
+    eid = Cur_Entry
+    print("PAYCHECK INFORMATION:\n")
+    
+    print("INSTRUCTIONS:")
+    print("- Select a numerical option from the list below by pressing that "
+          "numbers respective key on the keyboard.") 
+    print("- Press the Escape key (Esc) to return to the Payroll Menu.\n")
+    
+    print(f"SAVE PAYCHECK INFORMATION AND CLEAR EMPLOYEE TIMECARD?")
+    print("\n(1)\tYES - CLEAR EMPLOYEE TIME CARD AND SAVE PAYCHECK INFO")
+    print("(2)\tNO - RETURN TO PAYROLL MENU")
+
+    while(True):
+        Cur_Entry = getchar()
+        if Cur_Entry == '\x1b':
+            return "payroll_menu"
+        if Cur_Entry == "1":
+            del Employees[eid]
+            save_employees(EMP_FILE)
+            return "payroll_menu"
+        if Cur_Entry == "2":
+            return "payroll_menu"
+
 SCREENS = {
     "main_menu": main_menu,
     "clock_in": clock_in,
@@ -1186,6 +1256,8 @@ SCREENS = {
     "mod_emp_w": modify_employee_wage,
     "sup_clock_out_emp": sup_clock_out_emp,
     "sup_clock_out_all": sup_clock_out_all,
+    "payroll_menu": payroll_menu,
+    "paycheck_menu": paycheck_menu
 }
 
 def main():
@@ -1200,7 +1272,8 @@ def main():
     else:
         load_employees(EMP_FILE)
     while(True):
-        print(Screen)
+        # print(Screen)
+        Screen          # Can Just Call directly, no need to print?
         next_screen = SCREENS[Screen]()
         if next_screen == "_quit_":
             os.system('cls')    # Clear Screen
