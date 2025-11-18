@@ -13,8 +13,8 @@ import time
 import json
 
 # CONSTANT GLOBALS
-EMP_FILE = "employees.json"  # eventually store all employee data in JSON
-PASSWORD = "123456" # Need to add this password to the program. 
+EMP_FILE = "employees.json"     # Store all employee data in JSON
+PASSWORD = "123456"             # Need to add this password to the program. 
 
 KEYMAP = {
     '3b': 'F1',
@@ -81,8 +81,9 @@ def create_fake_employees():
     return
 
 
-"""Function that gets keys pressed on keyboard by the user"""
+
 def getchar():
+    """Function that gets keys pressed on keyboard by the user"""
     ch = msvcrt.getch()
     
     # handle if a special key was pressed that has a prefix byte (i.e. arrows,
@@ -96,11 +97,12 @@ def getchar():
         return KEYMAP.get(code, 'IGNORE')
     return ch.decode('utf', errors='ignore') 
 
-"""
-Function that gets a users input and returns it when they press enter. 
-If the user presses Escape, program returns without returning an entry
-"""
+
 def getentry():
+    """
+    Function that gets a users input and returns it when they press enter. 
+    If the user presses Escape, program returns without returning an entry
+    """
     entry = ''
     while True:
         ch = getchar()
@@ -128,12 +130,13 @@ def getentry():
             print("", end="\n", flush=False)
             return entry           
 
-"""
-Function that gets a users password input and returns it when they press enter. 
-If the user presses Escape, program returns without returning an entry. 
-Password is visually hidden during entry.
-"""
+
 def getpassword():
+    """
+    Function that gets a users password input and returns it when they press enter. 
+    If the user presses Escape, program returns without returning an entry. 
+    Password is visually hidden during entry.
+    """
     entry = ''
     while True:
         ch = getchar()      
@@ -268,6 +271,7 @@ def getLastHrs(eid):
             return Employees[eid]["time_cards"][i]["hrs"]
     return None
 
+# Paycheck Functions
 def sumHours(eid):
     total = 0
     for timecard in Employees[eid]["time_cards"]:
@@ -1212,8 +1216,19 @@ def payroll_menu():
     Cur_Entry = getentry()
 
     # User Found, go to details
-    if Cur_Entry in Employees:
+    if Cur_Entry in Employees and not getClockedIn(Cur_Entry):
         return "paycheck_menu"
+
+    if Cur_Entry in Employees and getClockedIn(Cur_Entry):
+        print("\nEMPLOYEE IS CLOCKED IN")
+        print("\nEmployee must be clocked out to show paycheck information.")
+        print("\nPress the Escape key (Esc) to return to the Supervisor Menu, "
+                "or any other key to try again.")
+        ch = getchar()
+        if ch == '\x1b':
+            return "supervisor_menu"
+        return "payroll_menu"    
+
 
     # User pressed Escape Key, go back to Supervisor menu
     if Cur_Entry == None:
