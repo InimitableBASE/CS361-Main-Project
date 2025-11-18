@@ -268,6 +268,29 @@ def getLastHrs(eid):
             return Employees[eid]["time_cards"][i]["hrs"]
     return None
 
+def sumHours(eid):
+    total = 0
+    for timecard in Employees[eid]["time_cards"]:
+        if timecard["hrs"] != "":
+            total += timecard["hrs"]
+    return total
+
+def calculatePay(eid):
+    wage = float(getWage(eid))
+    hrs = sumHours(eid)
+    total = wage * hrs  
+    return f"${total:.2f}"
+
+def generatePayCheck(eid):
+    pay = calculatePay(eid)
+    paycheck = "============================================================="
+    paycheck += f"\nPAYCHECK DATE: {datetime.now().strftime("%m/%d/%Y")}\n\n"
+    paycheck += f"PAY TO THE ORDER OF: {getFullName(eid).upper()}\t\t\t{pay}\n"
+    paycheck += f"{useNum2WordsMS(pay).upper()}\n"
+    paycheck += "============================================================="
+    paycheck += "\n"
+    return paycheck
+
 def showEmployeeList():
     data = [["EMPLOYEE NAME", "EMPLOYEE ID"]]
     for key in Employees:
@@ -450,9 +473,6 @@ def clock_out():
     elif Cur_Entry in Employees:
         new_clock_out(Cur_Entry)
         name = getFullName(Cur_Entry)
-        # sec_worked = work_duration.total_seconds()
-        # min_worked = sec_worked / 60
-        # hrs_worked = sec_worked / 3600
         outTime = getLastClockOut(Cur_Entry)
         hrs_worked = float(getLastHrs(Cur_Entry))
         min_worked = hrs_worked * 60
@@ -574,7 +594,8 @@ def supervisor_menu():
     print("(3)\tModify Hourly Employee")
     print("(4)\tRemove Hourly Employee")
     print("(5)\tView Employees Clock Status")
-    print("(6)\tLogout and Return to Main Menu")    
+    print("(6)\tPayroll Menu")    
+    print("(7)\tLogout and Return to Main Menu")    
     while(True):
         Cur_Entry = getchar()
         if Cur_Entry == '\x1b':
@@ -590,6 +611,8 @@ def supervisor_menu():
         if Cur_Entry == "5":
             return "clock_status"       
         if Cur_Entry == "6":
+            return "payroll_menu"
+        if Cur_Entry == "7":
             return "main_menu"
 
 def clock_status():
@@ -1190,7 +1213,7 @@ def payroll_menu():
 
     # User Found, go to details
     if Cur_Entry in Employees:
-        return "emp_detail"
+        return "paycheck_menu"
 
     # User pressed Escape Key, go back to Supervisor menu
     if Cur_Entry == None:
@@ -1206,13 +1229,18 @@ def payroll_menu():
             return "supervisor_menu"
         return "payroll_menu"    
 
-"""Remove Employee Confirmation Screen"""
+"""Paycheck Menu"""
 def paycheck_menu():
     os.system('cls') # Clear Screen
     global Cur_Entry
     eid = Cur_Entry
     print("PAYCHECK INFORMATION:\n")
-    
+    # TODO: Show Paycheck - Save as string
+    # pay = calculatePay(eid)
+    # print(pay)
+    # print(useNum2WordsMS(pay).upper())
+    paycheck = generatePayCheck(eid)
+    print(paycheck)
     print("INSTRUCTIONS:")
     print("- Select a numerical option from the list below by pressing that "
           "numbers respective key on the keyboard.") 
@@ -1227,8 +1255,7 @@ def paycheck_menu():
         if Cur_Entry == '\x1b':
             return "payroll_menu"
         if Cur_Entry == "1":
-            del Employees[eid]
-            save_employees(EMP_FILE)
+            # TODO: CLEAR TIME CARDS
             return "payroll_menu"
         if Cur_Entry == "2":
             return "payroll_menu"
