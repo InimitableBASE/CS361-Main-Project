@@ -295,6 +295,32 @@ def generatePayCheck(eid):
     paycheck += "\n"
     return paycheck
 
+def savePaycheck(eid, text):
+    """
+    Saves the paycheck (text) of employee with an Employee ID (eid) to a 
+    Text file named (DATE)_(FIRST)_(LAST).txt
+    """
+    file_name = f"{datetime.now().strftime("%m-%d-%Y")}_"\
+                f"{getFirstName(eid).upper()}_"\
+                f"{getLastName(eid).upper()}.txt"
+    folder = "Paychecks"
+    # Ensure the folder exists, create if needed
+    os.makedirs(folder, exist_ok=True)
+    path = os.path.join(folder, file_name)
+    writeTxt(path, text)
+    return
+    
+def clearTimecards(eid):
+    """
+    Clears the employees time cards and returns the text of the time card as a
+    string.
+    """
+    tc = "PAY PERIOD TIME CARDS:\n"
+    tc += json.dumps(Employees[eid]["time_cards"], indent=4)
+    Employees[eid]["time_cards"] = []
+    save_employees()
+    return tc    
+
 def showEmployeeList():
     data = [["EMPLOYEE NAME", "EMPLOYEE ID"]]
     for key in Employees:
@@ -636,17 +662,17 @@ def clock_status():
     print("- Select a numerical option from the list below by pressing that "
           "numbers respective key on the keyboard.")
     print("- To return to the Supervisor Menu, press the Escape key (Esc).")
-    print("\n(1)\tClock Out All Employees")
-    print("(2)\tClock Out A Single Employee")
+    print("\n(1)\tClock Out A Single Employee")
+    print("(2)\tClock Out ALL Employees")
     print("(3)\tLogout and Return to Supervisor Menu")    
     while(True):
         Cur_Entry = getchar()
         if Cur_Entry == '\x1b':
             return "supervisor_menu"
         if Cur_Entry == "1":
-            return "sup_clock_out_all"
-        if Cur_Entry == "2":
             return "sup_clock_out_emp"
+        if Cur_Entry == "2":
+            return "sup_clock_out_all"
         if Cur_Entry == "3":
             return "supervisor_menu"
 
@@ -1270,7 +1296,8 @@ def paycheck_menu():
         if Cur_Entry == '\x1b':
             return "payroll_menu"
         if Cur_Entry == "1":
-            # TODO: CLEAR TIME CARDS
+            paycheck += clearTimecards(eid)
+            savePaycheck(eid, paycheck)
             return "payroll_menu"
         if Cur_Entry == "2":
             return "payroll_menu"
