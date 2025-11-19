@@ -394,11 +394,11 @@ def main_menu():
     print("(4)\tSUPERVISOR MENU")
     print("(5)\tQUIT")
     print("\n\"Clock In\" tracks when you start work, \"Clock out\" tracks "
-          "when you stop work. Each takes one minute to help ensure "
+          "when you stop work. Each takes one minute to \nhelp ensure "
           "you are paid for your hard work!")
     print("\nNot sure if you're clocked in or out? Don't worry! You can try "
-          "clocking in or clocking out again and the program will tell you if "
-          "you are already clocked in or out!")
+          "clocking in or clocking out again and the\nprogram will tell you if"
+          " you are already clocked in or out!")
     while(True):
         Cur_Entry = getchar()
         if Cur_Entry == "1":
