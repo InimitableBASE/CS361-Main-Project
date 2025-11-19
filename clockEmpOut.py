@@ -108,6 +108,8 @@ def main():
         # Is text not blank and different from previously read text
         if text and text != last_text:
             
+            print(f"Argument Recieved: {text}")
+            
             # check if text is letters, make lowercase if so. 
             if text.isalpha():
                 text = text.lower()

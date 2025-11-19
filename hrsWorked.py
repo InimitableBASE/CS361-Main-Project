@@ -49,6 +49,8 @@ def main():
         if text and text != last_text:
             
             eid = text
+
+            print (f"Argument Received: {eid}")
             
             # check if eid is valid and has 'm' appended.
             if len(eid) == 5 and eid[-1] == 'm':

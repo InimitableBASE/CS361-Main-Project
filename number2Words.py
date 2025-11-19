@@ -112,6 +112,9 @@ def main():
         # Is text not blank and different from previously read text
         if text and text != last_text:
             
+            # Print Argument Recieved:
+            print(f"Argument Received: {text}")
+
             # check if text is letters, make lowercase if so. 
             if text.isalpha():
                 text = text.lower()
@@ -129,7 +132,14 @@ def main():
                 dollars, cents = getValues(text)
                 dollars = convertToWords(dollars)
                 cents = convertToWords(cents)
-                response = f"{dollars} dollars and {cents} cents"
+                if dollars == "One" and cents == "One":
+                    response = f"{dollars} Dollar And {cents} Cent"
+                elif dollars == "One":
+                    response = f"{dollars} Dollar And {cents} Cents"
+                elif cents == "One":
+                    response = f"{dollars} Dollars And {cents} Cent"
+                else:
+                   response = f"{dollars} Dollars And {cents} Cents"
             elif positiveInt:
                 response = convertToWords(int(text))
 
