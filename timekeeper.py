@@ -193,7 +193,7 @@ def useService(file_path, text):
     return readTxtFile(file_path)
 
 def useGreetingMS(name):
-    file_path = "Greet Folder\greeting.txt"
+    file_path = "Greet Folder/greeting.txt"
     return useService(file_path, name)
 
 def useHoursWorkedMS(eid):
